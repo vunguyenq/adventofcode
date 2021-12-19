@@ -1,7 +1,7 @@
 import datetime
 import numpy as np
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -20,7 +20,7 @@ def parse_input(input):
         locs.append((from_loc, to_loc))
     return locs
 
-def part1(input):
+def part1(input, diagonal = False):
     max_x = max([line[0][0] for line in input] + [line[1][0] for line in input])
     max_y = max([line[0][1] for line in input] + [line[1][1] for line in input])
     ground = np.zeros((max_y + 1, max_x + 1), dtype=int)
@@ -32,13 +32,17 @@ def part1(input):
         elif y1 == y2:
             min_x, max_x = min(x1, x2), max(x1, x2) + 1
             ground[y1, min_x: max_x] += 1
+        elif(diagonal):
+            x_increment = -(x1-x2) // abs(x1-x2)
+            y_increment = -(y1-y2) // abs(y1-y2)
+            for i in range(abs(x1-x2)+1):
+                ground[y1 + i * y_increment, x1 + i * x_increment] += 1
         else:
-            continue        
+            continue
     return (ground > 1).sum()
 
 def part2(input):
-    result = 0
-    return result
+    return part1(input, diagonal = True)
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
