@@ -1,7 +1,7 @@
 import datetime
 import numpy as np
 
-exec_part = 1 # which part to execute
+exec_part = 2# which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -14,13 +14,23 @@ with open('input/input07.txt') as f:
 def parse_input(input):
     return list(map(int,input.split(',')))
 
+# Median is the point which minimizes the sum of distances for one-dimensional data: https://en.wikipedia.org/wiki/Geometric_median
 def part1(input):
     positions = np.array(input)
     return int(np.sum(abs(positions - np.median(positions))))
 
 def part2(input):
-    result = 0
-    return result
+    positions = np.array(input)
+    min_pos, max_pos = np.min(positions), np.max(positions)
+    min_fuel = None
+    for p in range(min_pos, max_pos + 1):
+        distance_func = lambda n: (abs(n-p))*(abs(n-p)+1)/2 # https://en.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF
+        distance = np.sum(distance_func(positions))
+        if(min_fuel is None):
+            min_fuel = distance
+        else:
+            min_fuel = min(min_fuel, distance)
+    return int(min_fuel)
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
