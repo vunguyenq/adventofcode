@@ -1,7 +1,3 @@
-import numpy as np
-p = 5
-distance_func = lambda x: (x-p)(x-p+1)/2
-x = np.array([1, 2, 3, 4, 5])
-f = lambda x: (x-p)*(x-p+1)/2
-squares = f(x)
-print(squares)
+segments = {0: 'abcefg', 1:'cf', 2:'acdeg', 3:'acdfg', 4:'bcdf', 5:'abdfg', 6:'abdefg', 7:'acf', 8:'abcdefg', 9:'abcdfg'}
+segments = {key: set(segments[key]) for key in segments}
+print(segments.values())
