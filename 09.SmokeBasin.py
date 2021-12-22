@@ -1,7 +1,7 @@
 import datetime
 import numpy as np
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -16,10 +16,10 @@ def parse_input(input):
 
 def find_adjacents(r, c, nrow, ncol):
     adjacents = []
-    adjacents = adjacents + [np.array([r, c-1])] if c-1 >= 0 else adjacents
-    adjacents = adjacents + [np.array([r, c+1])] if c+1 < ncol else adjacents
-    adjacents = adjacents + [np.array([r-1, c])] if r-1 >= 0 else adjacents
-    adjacents = adjacents + [np.array([r+1, c])] if r+1 < nrow else adjacents
+    if c-1 >= 0: adjacents.append((r, c-1))
+    if c+1 < ncol: adjacents.append((r, c+1))
+    if r-1 >= 0: adjacents.append((r-1, c))
+    if r+1 < nrow: adjacents.append((r+1, c))
     return adjacents
 
 def find_low_points(input):
@@ -30,15 +30,31 @@ def find_low_points(input):
             height = input[r,c]
             adjacent_values = [input[x[0],x[1]] for x in find_adjacents(r, c, nrow, ncol)]
             if height < min(adjacent_values):
-                low_points.append(np.array([r,c]))
+                low_points.append((r,c))
     return low_points
 
 def part1(input):
     return sum(input[p[0], p[1]] + 1 for p in find_low_points(input))
 
 def part2(input):
-    result = 0
-    return result
+    nrow, ncol = input.shape
+    low_points = find_low_points(input)
+    all_basin_sizes = []
+    # Traverse from low points, add next points to a stack
+    for p in low_points:
+        next_points = [p]
+        basin_points = []
+        while len(next_points) > 0:
+            current_point = next_points.pop()
+            adjacents = find_adjacents(current_point[0], current_point[1], nrow, ncol)
+            next_points.extend([point for point in adjacents 
+                                    if  input[point[0], point[1]] < 9 
+                                    and input[point[0], point[1]] > input[current_point[0], current_point[1]]
+                                    and point not in basin_points]
+                                    )
+            if current_point not in basin_points: basin_points.append(current_point)
+        all_basin_sizes.append(len(basin_points))
+    return np.prod(sorted(all_basin_sizes)[-3:])
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
