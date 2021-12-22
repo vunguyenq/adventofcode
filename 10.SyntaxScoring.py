@@ -1,6 +1,6 @@
 import datetime
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -13,9 +13,10 @@ with open('input/input10.txt') as f:
 def parse_input(input):
     return input.split('\n')
 
+open_chars = '([{<'
+close_chars = ')]}>'
+
 def find_corrupted_rows(input):
-    open_chars = '([{<'
-    close_chars = ')]}>'
     corrupted_rows = []
     first_corrupted_chars = []
     for row in input:
@@ -39,8 +40,25 @@ def part1(input):
     return sum([char_scores[c] for c in first_corrupted_chars])
 
 def part2(input):
-    result = 0
-    return result
+    char_scores = {')':1, ']': 2, '}': 3, '>': 4}
+    open_close_map = dict(zip(list(open_chars), list(close_chars)))
+    corrupted_rows, _ = find_corrupted_rows(input)
+    incomplete_rows = [r for r in input if r not in corrupted_rows]
+    all_scores = []
+    # Similar to part 1, now calculate completion string based on open characters left in the stack after scanning entire line
+    for row in incomplete_rows:
+        open_stack = []
+        score = 0
+        for c in row:
+            if c in open_chars: 
+                open_stack.append(c)
+            else:
+                open_stack.pop()
+        completion_str = [open_close_map[c] for c in reversed(open_stack)]
+        for c in completion_str:
+            score = score * 5 + char_scores[c]
+        all_scores.append(score)
+    return sorted(all_scores)[len(all_scores)//2]
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
