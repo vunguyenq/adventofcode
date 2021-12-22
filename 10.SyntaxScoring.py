@@ -13,11 +13,11 @@ with open('input/input10.txt') as f:
 def parse_input(input):
     return input.split('\n')
 
-def part1(input):
+def find_corrupted_rows(input):
     open_chars = '([{<'
     close_chars = ')]}>'
-    char_scores = {')':3, ']': 57, '}': 1197, '>': 25137}
-    score = 0
+    corrupted_rows = []
+    first_corrupted_chars = []
     for row in input:
         # Use a stack to store open brackets. When a close bracket is found, check with the last close bracket.
         open_stack = []
@@ -28,9 +28,15 @@ def part1(input):
                 last_open_char = open_stack.pop()
                 if last_open_char != open_chars[close_chars.find(c)]:
                     #print(f"Expect {close_chars[open_chars.find(last_open_char)]}, found {c}. Row: {row}")
-                    score += char_scores[c]
+                    first_corrupted_chars.append(c)
+                    corrupted_rows.append(row)
                     break
-    return score
+    return corrupted_rows, first_corrupted_chars
+
+def part1(input):
+    char_scores = {')':3, ']': 57, '}': 1197, '>': 25137}
+    _, first_corrupted_chars = find_corrupted_rows(input)
+    return sum([char_scores[c] for c in first_corrupted_chars])
 
 def part2(input):
     result = 0
