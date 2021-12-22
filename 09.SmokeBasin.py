@@ -13,19 +13,23 @@ with open('input/input09.txt') as f:
 
 def parse_input(input):
     return np.array([list(map(int,(list(row)))) for row in input.split('\n')], dtype=int)
-    
+
+def find_adjacents(r, c, nrow, ncol):
+    adjacents = []
+    adjacents = adjacents + [np.array([r, c-1])] if c-1 >= 0 else adjacents
+    adjacents = adjacents + [np.array([r, c+1])] if c+1 < ncol else adjacents
+    adjacents = adjacents + [np.array([r-1, c])] if r-1 >= 0 else adjacents
+    adjacents = adjacents + [np.array([r+1, c])] if r+1 < nrow else adjacents
+    return adjacents
+
 def find_low_points(input):
     nrow, ncol = input.shape
     low_points = []
     for r in range(nrow):
         for c in range(ncol):
             height = input[r,c]
-            adjacents = []
-            adjacents = adjacents + [(input[r, c-1])] if c-1 >= 0 else adjacents
-            adjacents = adjacents + [(input[r, c+1])] if c+1 < ncol else adjacents
-            adjacents = adjacents + [(input[r-1, c])] if r-1 >= 0 else adjacents
-            adjacents = adjacents + [(input[r+1, c])] if r+1 < nrow else adjacents
-            if height < min(adjacents):
+            adjacent_values = [input[x[0],x[1]] for x in find_adjacents(r, c, nrow, ncol)]
+            if height < min(adjacent_values):
                 low_points.append(np.array([r,c]))
     return low_points
 
