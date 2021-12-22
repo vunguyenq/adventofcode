@@ -13,10 +13,10 @@ with open('input/input09.txt') as f:
 
 def parse_input(input):
     return np.array([list(map(int,(list(row)))) for row in input.split('\n')], dtype=int)
-
-def part1(input):
+    
+def find_low_points(input):
     nrow, ncol = input.shape
-    risk_sum = 0
+    low_points = []
     for r in range(nrow):
         for c in range(ncol):
             height = input[r,c]
@@ -26,8 +26,11 @@ def part1(input):
             adjacents = adjacents + [(input[r-1, c])] if r-1 >= 0 else adjacents
             adjacents = adjacents + [(input[r+1, c])] if r+1 < nrow else adjacents
             if height < min(adjacents):
-                risk_sum += height + 1
-    return risk_sum
+                low_points.append(np.array([r,c]))
+    return low_points
+
+def part1(input):
+    return sum(input[p[0], p[1]] + 1 for p in find_low_points(input))
 
 def part2(input):
     result = 0
