@@ -23,33 +23,41 @@ def find_adjacents(pos, size):
     adjacents = [a for a in adjacents if a[0] in range(nrow) and a[1] in range(ncol)]
     return adjacents
 
-def part1(input):
-    octopuses = input
+# Run 1 single step
+# Return energy statuses of octopuses after step and number of flashes during the step
+def run_step(octopuses):
     nrow, ncol = octopuses.shape
     flash_count = 0
+    # 1. Increase energy of all octopuses by 1
+    octopuses += 1
+    # 2. Flash & increase enery of nearby octopuses until no more flash
+    flashes = np.zeros(octopuses.shape, dtype=bool) # Keep track of which octopuses flash in this step
+    while(True): # Cascading flashes until no more flash
+        no_more_flash = True
+        for r in range(nrow):
+            for c in range(ncol):
+                energy = octopuses[r,c]
+                if(energy <= 9 or flashes[r,c]):
+                    continue
+                # else - octopus at (r,c) flashes
+                no_more_flash = False
+                flashes[r,c] = True
+                flash_count += 1
+                adjacents = find_adjacents(np.array((r,c)), octopuses.shape)
+                for a in adjacents:
+                    octopuses[a[0], a[1]] += 1
+        if(no_more_flash):
+            break
+    # 3. Reset energy of flashed octopuses
+    octopuses[octopuses > 9] = 0
+    return octopuses, flash_count
+
+def part1(input):
+    octopuses = input
+    flash_count = 0
     for step in range(100):
-        # 1. Increase energy of all octopuses by 1
-        octopuses += 1
-        # 2. Flash & increase enery of nearby octopuses until no more flash
-        flashes = np.zeros(octopuses.shape, dtype=bool) # Keep track of which octopuses flash in this step
-        while(True): # Cascading flashes until no more flash
-            no_more_flash = True
-            for r in range(nrow):
-                for c in range(ncol):
-                    energy = octopuses[r,c]
-                    if(energy <= 9 or flashes[r,c]):
-                        continue
-                    # else - octopus at (r,c) flashes
-                    no_more_flash = False
-                    flashes[r,c] = True
-                    flash_count += 1
-                    adjacents = find_adjacents(np.array((r,c)), octopuses.shape)
-                    for a in adjacents:
-                        octopuses[a[0], a[1]] += 1
-            if(no_more_flash):
-                break
-        # 3. Reset energy of flashed octopuses
-        octopuses[octopuses > 9] = 0
+        octopuses, step_flash_count = run_step(octopuses)
+        flash_count += step_flash_count
     return flash_count
 
 def part2(input):
