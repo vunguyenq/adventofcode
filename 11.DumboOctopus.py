@@ -37,7 +37,7 @@ def run_step(octopuses):
         for r in range(nrow):
             for c in range(ncol):
                 energy = octopuses[r,c]
-                if(energy <= 9 or flashes[r,c]):
+                if(energy <= 9 or flashes[r,c]): # Skip octopuses that don't have enough energy or already flashed
                     continue
                 # else - octopus at (r,c) flashes
                 no_more_flash = False
