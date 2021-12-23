@@ -2,7 +2,7 @@ import datetime
 import numpy as np
 from itertools import product 
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -61,8 +61,14 @@ def part1(input):
     return flash_count
 
 def part2(input):
-    result = 0
-    return result
+    octopuses = input
+    step = 0
+    while(True): 
+        step += 1
+        octopuses, step_flash_count = run_step(octopuses)
+        if(step_flash_count == 100): # Loop until the step where all octopuses flash
+            return step
+    return None
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
