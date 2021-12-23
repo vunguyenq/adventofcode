@@ -1,7 +1,7 @@
 import datetime
 import networkx as nx
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -20,29 +20,32 @@ def parse_input(input):
     return G
 
 # Recursively find all paths from a given node to 'end'. 
-def scan_all_paths(start_node, current_path, G):
+def scan_all_paths(start_node, current_path, G, single_small_cave_visit = 1):
     path_count = 0
     if start_node == 'end':
         #print(current_path)
         return path_count + 1
     # Jump to new caves or backtrack to big caves. No backtracking to small caves.
-    next_nodes = [n for n in G.neighbors(start_node) if n not in [cave for cave in current_path if G.nodes[cave]['big_cave'] == False]]
+    visited_small_caves = [cave for cave in current_path if G.nodes[cave]['big_cave'] == False]
+    next_nodes = [n for n in G.neighbors(start_node) 
+                        if ((visited_small_caves.count(n) < single_small_cave_visit and len(visited_small_caves) == len(set(visited_small_caves))) # part 2 - allows visiting 1 single small case twice
+                                or (n not in visited_small_caves))
+                            and n != 'start'
+                 ]
     for n in next_nodes:
         next_path = current_path.copy()
         next_path.append(n)
-        path_count += scan_all_paths(n, next_path, G)
+        path_count += scan_all_paths(n, next_path, G, single_small_cave_visit)
     return path_count
 
 def part1(input):
     G = input
-    node_stack = ['start']
-    #while(len(node_stack) > 0):
-        #n = 
     return scan_all_paths('start', ['start'], G)
 
+# Was sooo confused with "single small cave". Initially thought it was "small cave with 1 adjacent cave"
 def part2(input):
-    result = 0
-    return result
+    G = input
+    return scan_all_paths('start', ['start'], G, single_small_cave_visit = 2)
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
