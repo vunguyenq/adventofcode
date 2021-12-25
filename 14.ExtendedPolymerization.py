@@ -2,8 +2,8 @@ import datetime
 from blist import blist
 import numpy as np
 
-exec_part = 1 # which part to execute
-exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
+exec_part = 2 # which part to execute
+exec_test_case = -1 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
 with open('input/input_test14.txt') as f:
@@ -17,9 +17,9 @@ def parse_input(input):
     rules = [row.split(' -> ') for row in rules_raw.split('\n')]
     return blist(list(template)), {tuple(r[0]): r[1] for r in rules} # Use blist instead of list for better performance on inserting to middle of list
 
-def part1(input, nsteps = 10):
+def part1(input, nsteps = 10, progress_tracking = True):
     polymer, rules = input
-    for _ in range(nsteps):
+    for step in range(nsteps):
         i = 0
         while (i < len(polymer)-1):
             pair = tuple(polymer[i:i+2])
@@ -29,12 +29,13 @@ def part1(input, nsteps = 10):
                 continue
             polymer.insert(i+1, inserted_element)
             i+=2 # Skip newly inserted element in this step
+        if(progress_tracking): print(f'Step {step} done. Polymer length: {len(polymer)}')
     frequency_counts = np.unique(np.array(polymer), return_counts=True)
     print(f"After {nsteps}, polymer length is {len(polymer)}.")
     return np.max(frequency_counts[1]) - np.min(frequency_counts[1])
 
 def part2(input):
-    return 0
+    return part1(input, nsteps = 40, progress_tracking = True)
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
