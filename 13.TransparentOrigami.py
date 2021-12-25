@@ -28,7 +28,7 @@ def parse_input(input):
 def paper_text(paper):
     return ('\n'.join(''.join(str(x) for x in y) for y in paper).replace('0','.').replace('1','#'))
 
-# Do a single fold()
+# Do a single fold
 def fold(paper, fold):
     fold_ax, fold_at = fold
     if fold_ax == 'y':
