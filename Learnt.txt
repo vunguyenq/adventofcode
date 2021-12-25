@@ -4,3 +4,6 @@ Day 07:
 Day 13: 
 - Recap: numpy 2d array - flipud, fliplr, vstack, hstack
 - Recap: plotting image from np array bitmap
+Day 14:
+- High-performance inserts into beginning/ middle of large lists using blist (similar to 2018 Day 09)
+- Efficient frequency count in list using collections.Counter
