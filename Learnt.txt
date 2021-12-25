@@ -1,3 +1,6 @@
 Day 07:
 - Median is the point which minimizes the sum of distances for one-dimensional data: https://en.wikipedia.org/wiki/Geometric_median
 - Sum of divergent series 1 + 2 + 3 + 4 +... https://en.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF
+Day 13: 
+- Recap: numpy 2d array - flipud, fliplr, vstack, hstack
+- Recap: plotting image from np array bitmap
