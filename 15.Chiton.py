@@ -15,9 +15,7 @@ with open('input/input15.txt') as f:
 
 # Return a directed graph. Example of edge weight: (0,0) => (0,1): weight = value at (0,1); (0,1) => (0,0): weight = value at (0,0)
 def parse_input(input):
-    data = [list(map(int, list(row))) for row in input.split('\n')]
-    np_data = np.array(data, dtype=np.int8)
-    return np_data
+    return np.array([list(map(int, list(row))) for row in input.split('\n')], dtype=np.int8)
 
 def build_graph(np_data):
     nrow, ncol = np_data.shape
