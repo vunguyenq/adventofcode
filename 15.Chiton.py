@@ -13,10 +13,10 @@ with open('input/input_test15.txt') as f:
 with open('input/input15.txt') as f:
     INPUT = f.read()   
 
-# Return a directed graph. Example of edge weight: (0,0) => (0,1): weight = value at (0,1); (0,1) => (0,0): weight = value at (0,0)
 def parse_input(input):
     return np.array([list(map(int, list(row))) for row in input.split('\n')], dtype=np.int8)
 
+# Return a directed graph. Example of edge weight: (0,0) => (0,1): weight = value at (0,1); (0,1) => (0,0): weight = value at (0,0)
 def build_graph(np_data):
     nrow, ncol = np_data.shape
     G = nx.DiGraph()
