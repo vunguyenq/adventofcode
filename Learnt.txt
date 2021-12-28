@@ -8,4 +8,4 @@ Day 14:
 - High-performance inserts into beginning/ middle of large lists using blist (similar to 2018 Day 09)
 - Efficient frequency count in list using collections.Counter
 Day 15:
-- Find shortest path in a weighted undirected graph using networkx.shortest_path
+- Find shortest path in a weighted directed graph using networkx.shortest_path
