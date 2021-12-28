@@ -3,7 +3,7 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -37,17 +37,35 @@ def visualize(G):
     nx.draw_networkx_edge_labels(G,pos,edge_labels=labels)
     plt.show()
 
+# Repeating array to the right or down, increase 1 each time
+def repeat_arr(arr, direction, repeat = 4):
+    increased_arr = arr 
+    repeating_arrs = [increased_arr]
+    for _ in range(repeat):
+        increased_arr = (increased_arr % 9) + 1
+        repeating_arrs.append(increased_arr.copy())
+    if (direction == 'right'):
+        arr = np.hstack(repeating_arrs)
+    else: # repeating down
+        arr = np.vstack(repeating_arrs)
+    return arr
+
 def part1(input):
     np_data = input
     G = build_graph(input)
     target_pos = tuple(np_data.shape - np.array((1,1)))
-    shortest_path = (nx.shortest_path(G,source=(0,0), target=target_pos, weight='weight', method='bellman-ford'))
+    shortest_path = (nx.shortest_path(G,source=(0,0), target=target_pos, weight='weight', method='dijkstra')) #Performance: dijkstra ~ 0.13 sec; bellman-ford ~ 0.25 sec
     #visualize(G)
     return sum([np_data[pos[0], pos[1]] for pos in shortest_path[1:]])
 
 def part2(input):
-    result = 0
-    return result
+    np_data = input
+    np_data = repeat_arr(np_data, 'right')
+    np_data = repeat_arr(np_data, 'down')
+    G = build_graph(np_data)
+    target_pos = tuple(np_data.shape - np.array((1,1)))
+    shortest_path = (nx.shortest_path(G,source=(0,0), target=target_pos, weight='weight', method='dijkstra')) #Performance: dijkstra ~ 7 sec; bellman-ford ~ 22 sec
+    return sum([np_data[pos[0], pos[1]] for pos in shortest_path[1:]])
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
