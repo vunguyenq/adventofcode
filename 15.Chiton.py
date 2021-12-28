@@ -17,9 +17,12 @@ with open('input/input15.txt') as f:
 def parse_input(input):
     data = [list(map(int, list(row))) for row in input.split('\n')]
     np_data = np.array(data, dtype=np.int8)
+    return np_data
+
+def build_graph(np_data):
     nrow, ncol = np_data.shape
     G = nx.DiGraph()
-    for r, row in enumerate(data):
+    for r, row in enumerate(np_data):
         for c, col in enumerate(row):
             if c+1 < ncol: 
                 G.add_edge((r,c), (r, c+1), weight = np_data[r, c+1])
@@ -27,7 +30,7 @@ def parse_input(input):
             if r+1 < nrow: 
                 G.add_edge((r,c), (r+1, c), weight = np_data[r+1, c])
                 G.add_edge((r+1,c), (r, c), weight = np_data[r, c])
-    return G, np_data
+    return G
 
 def visualize(G):
     pos = nx.spring_layout(G)
@@ -37,11 +40,12 @@ def visualize(G):
     plt.show()
 
 def part1(input):
-    G, data = input
-    target_pos = tuple(data.shape - np.array((1,1)))
+    np_data = input
+    G = build_graph(input)
+    target_pos = tuple(np_data.shape - np.array((1,1)))
     shortest_path = (nx.shortest_path(G,source=(0,0), target=target_pos, weight='weight', method='bellman-ford'))
     #visualize(G)
-    return sum([data[pos[0], pos[1]] for pos in shortest_path[1:]])
+    return sum([np_data[pos[0], pos[1]] for pos in shortest_path[1:]])
 
 def part2(input):
     result = 0
