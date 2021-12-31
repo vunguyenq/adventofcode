@@ -1,6 +1,7 @@
 import datetime
+import math 
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -46,6 +47,22 @@ class Packet:
                     if(len(sub_pkg_bits) == 0):
                         break
                 self.remaining_bits = sub_pkg_bits
+            
+            # Part 2 - calculate value from sub packets
+            if self.type_id == 0:
+                self.value = sum([p.value for p in self.sub_packets])
+            elif self.type_id == 1:
+                self.value = math.prod([p.value for p in self.sub_packets])
+            elif self.type_id == 2:
+                self.value = min([p.value for p in self.sub_packets])
+            elif self.type_id == 3:
+                self.value = max([p.value for p in self.sub_packets])
+            elif self.type_id == 5:
+                self.value = 1 if self.sub_packets[0].value > self.sub_packets[1].value else 0
+            elif self.type_id == 6:
+                self.value = 1 if self.sub_packets[0].value < self.sub_packets[1].value else 0
+            else: # self.type_id == 7
+                self.value = 1 if self.sub_packets[0].value == self.sub_packets[1].value else 0
 
 def parse_input(input):
     return Packet(''.join([bin(int(c,16))[2:].zfill(4) for c in input]))
@@ -60,8 +77,7 @@ def part1(input):
     return version_sum
 
 def part2(input):
-    result = 0
-    return result
+    return input.value
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
