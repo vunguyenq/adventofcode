@@ -1,7 +1,7 @@
 import datetime
 import numpy as np
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -23,19 +23,19 @@ def step(pos, vel):
     vel[1] -= 1
     return pos, vel
 
+# Naive approach - bruteforcing: try all initial velocities from (1,1) to (max_x, abs(min_y)). 
+# Simulate steps, pick highest y of attemps that hits target area at least once and return max(highest y)
+# Simplified solution of scanning y coordinate only does NOT work if target x range is too narrow - https://www.reddit.com/r/adventofcode/comments/rid0g3/2021_day_17_part_1_an_input_that_might_break_your/
 def part1(input):
     target_x, target_y = input
     max_height = 0
-    # Naive approach - bruteforcing: try all initial velocities from (1,1) to (max_x, abs(min_y)). 
-    # Simulate steps, pick highest y of attemps that hits target area at least once and return max(highest y)
-    # Simplified solution of scanning y coordinate only does NOT work if target x range is too narrow - https://www.reddit.com/r/adventofcode/comments/rid0g3/2021_day_17_part_1_an_input_that_might_break_your/
     for x_vel in range(1, target_x[1]):
         for y_vel in range(1, abs(target_y[0])):
             pos = np.array((0,0))
             vel = np.array((x_vel, y_vel))
             max_height_attemp = 0
             hit_target = False
-            while (pos[0] <= target_x[1] + 1 and pos[1] >= target_y[1] + 1):
+            while (pos[0] <= target_x[1] + 1 and pos[1] >= target_y[0] + 1):
                 pos, vel = step(pos, vel)
                 max_height_attemp = max(max_height_attemp, pos[1])
                 if (pos[0] in range(target_x[0], target_x[1] + 1) and pos[1] in range(target_y[0], target_y[1] + 1)):
@@ -44,9 +44,24 @@ def part1(input):
                 max_height = max(max_height, max_height_attemp)
     return max_height
 
+# Still bruteforcing approach. 
+# This time scan all initial velocities from (0, min_y) to (max_x, abs(min_y)), and find initial velocities that eventually hit target area at least once.
 def part2(input):
-    result = 0
-    return result
+    target_x, target_y = input
+    vel_count = 0
+    for x_vel in range(target_x[1]+1):
+        for y_vel in range(target_y[0], abs(target_y[0])+1):
+            pos = np.array((0,0))
+            vel = np.array((x_vel, y_vel))
+            hit_target = False
+            while (pos[0] <= target_x[1] + 1 and pos[1] >= target_y[0] + 1):
+                pos, vel = step(pos, vel)
+                if (pos[0] in range(target_x[0], target_x[1] + 1) and pos[1] in range(target_y[0], target_y[1] + 1)):
+                    hit_target = True
+                    break
+            if(hit_target):
+                vel_count += 1
+    return vel_count
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
