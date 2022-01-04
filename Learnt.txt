@@ -11,3 +11,5 @@ Day 15:
 - Find shortest path in a weighted directed graph using networkx.shortest_path
 Day 16:
 - Use OOP to model a hierachical structure - An object instance contains object(s) of the same class as its properties
+Day 18:
+- Python library binarytree

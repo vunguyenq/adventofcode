@@ -1,7 +1,7 @@
 import datetime
-
+from binarytree import Node
 exec_part = 1 # which part to execute
-exec_test_case = 4 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
+exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
 with open('input/input_test18.txt') as f:
@@ -10,72 +10,83 @@ with open('input/input_test18.txt') as f:
 with open('input/input18.txt') as f:
     INPUT = f.read()   
 
-class Pair:
-    def __init__(self, left_element = None, right_element = None, depth = 0):
-        self.left_element = left_element
-        self.right_element = right_element
-        self.depth = depth
-    
-    def print(self):
-        left_str = str(self.left_element) if isinstance(self.left_element, int) else self.left_element.print()
-        right_str = str(self.right_element) if isinstance(self.right_element, int) else self.right_element.print()
-        return f"[{left_str},{right_str}]"
-    
-    def split(self, number, current_depth):
-        child_left, child_right = sorted([number // 2, number - number//2])
-        return Pair(child_left, child_right, current_depth + 1)
-    
-    def reduce(self):
-        print(self.print())
-        left_result = None
-        if isinstance(self.left_element, int):
-            if self.left_element >= 10:
-                self.left_element = self.split(self.left_element, self.depth)
-                return 'split'
-        else:
-            if self.depth < 4:
-                left_result = self.left_element.reduce()
-            else:
-                return self.depth
-        if not(left_result == None):
-            return left_result
-
-        if isinstance(self.right_element, int):
-            if self.right_element >= 10:
-                self.right_element = self.split(self.right_element, self.depth)
-                return 'split'
-        else:
-            if self.depth < 4:
-                return self.right_element.reduce()
-            else:
-                return self.depth
-
-        return None
-
-
-
-# Recursively parse a nested list to a Pair object
-def list_2_pair(list_data, depth=0):
+# Recursively parse a nested list to a binarytree object. Return root node of the tree.
+# Resulting binary tree: leave nodes = regular numbers; parent nodes = pairs. Values of parent nodes = -1  
+def list_2_tree(list_data):
     left_data, right_data = list_data
-    p = Pair(depth = depth)
-    p.left_element = left_data if isinstance(left_data, int) else list_2_pair(left_data, depth+1)
-    p.right_element = right_data if isinstance(right_data, int)  else list_2_pair(right_data, depth+1)
-    return p
+    n = Node(-1)
+    n.left = Node(left_data) if isinstance(left_data, int) else list_2_tree(left_data)
+    n.right = Node(right_data) if isinstance(right_data, int)  else list_2_tree(right_data)
+    return n
 
 def parse_input(input):
-    return [list_2_pair(eval(r)) for r in input.split('\n')]
+    return [list_2_tree(eval(r)) for r in input.split('\n')]
 
+# Recursively find first explodable node (node at depth = 4 and is not a leaf node) in a binary tree
+# Depth First Search/ preorder traversal (root => left sub-tree => right sub-tree)
+def first_explodable(node, depth=0):
+    if depth == 4 and node.value == -1:
+        return node
+    if node.value != -1: # leaf node
+        return None
+    left_explodable = first_explodable(node.left, depth+1)
+    right_explodable = first_explodable(node.right, depth+1)
+    if left_explodable is not None: return left_explodable
+    else: return right_explodable
+
+# Do a single reduce step
+def reduce(root):
+    all_nodes = root.preorder # Return a list of nodes by preorder traversal (root => left sub-tree => right sub-tree)
+    leaves = [n for n in all_nodes if n.value != -1]
+    for n in all_nodes:
+        # Explode
+        explode_node = first_explodable(root)
+        if explode_node is not None:
+            explode_left, explode_right = explode_node.left, explode_node.right
+            # Add left value to first regular number to the left of the exploding pair, if any
+            explode_left_index = leaves.index(explode_left)
+            if(explode_left_index > 0):
+                leaves[explode_left_index - 1].value += explode_left.value
+             # Add right value to first regular number to the right of the exploding pair, if any
+            explode_right_index = leaves.index(explode_right)
+            if(explode_right_index < len(leaves)-1):
+                leaves[explode_right_index + 1].value += explode_right.value
+            # Reset exploding pair to regular number 0
+            explode_node.value = 0
+            del explode_node[1]
+            del explode_node[2]
+            return True
+        # Split
+        if n in leaves and n.value > 9:
+            left_num, right_num = sorted([n.value // 2, n.value - n.value//2])
+            n.value = -1
+            n.left = Node(left_num)
+            n.right = Node(right_num)
+            return True
+    return False
+
+# Recursively calculate magnitude value
+def magnitude(node):
+    if node.value != -1: return node.value
+    else: return 3 * magnitude(node.left) + 2 * magnitude(node.right)
+
+# Add 2 snailfish number n1, n2 represented as binary trees. Return root of the resulting binary tree
+def add(n1, n2):
+    # Create binary tree representing unreduced addition of 2 numbers
+    sum_root = Node(-1)
+    sum_root.left = n1
+    sum_root.right = n2
+    # Reduce the sum until no further possible
+    more_reduced = True
+    while more_reduced:
+        more_reduced = reduce(sum_root)
+    return sum_root
 
 def part1(input):
-    test_input = eval('[[[[0,7],16],[15,[0,13]]],[1,1]]')
-    #test_input = eval('[1,2]')
-    t = list_2_pair(test_input)
-    print(t.print())
-    print(t.reduce())
-    print(t.print())
-    #for i in input:
-    #    print(i.print())
-    #return 0
+    sum_root = input[0]
+    for n in input[1:]:
+        sum_root = add(sum_root, n)
+    return magnitude(sum_root)
 
 def part2(input):
     result = 0
