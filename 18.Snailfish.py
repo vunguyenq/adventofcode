@@ -1,6 +1,8 @@
 import datetime
 from binarytree import Node
-exec_part = 1 # which part to execute
+from itertools import permutations
+
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -89,9 +91,8 @@ def part1(input):
     return magnitude(sum_root)
 
 def part2(input):
-    result = 0
-    return result
-
+    return max([magnitude(add(input[p[0]].clone(), input[p[1]].clone())) for p in permutations(list(range(len(input))), 2)])
+        
 if __name__ == "__main__":
     if(exec_test_case == 0):
         inputs = [INPUT]
