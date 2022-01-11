@@ -1,9 +1,9 @@
 import datetime
 import numpy as np
 import math
-from itertools import product
+from itertools import product, combinations
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -32,10 +32,12 @@ def rotation_matrices():
                 rot_matrix_data.append(tuple(map(tuple, rot_matrix))) # Convert array to tuple of tuple to deduplicate
     return [np.array(r, dtype=np.int8) for r in set(rot_matrix_data)]
 
-def part1(input):
+# Identify positions of all scanners and beacons relative to scanner 0
+def identify_all(input):
     rot_matrices = rotation_matrices()
     all_beacons = np.copy(input[0])
     identified_scanners = [0]
+    scanners = [np.array([0,0,0])]
     # Trying to rotate beacons detected by each scanner relative to scanner 0
     while (len(identified_scanners) < len(input)):
         unidentified_scanners = [n for n in range(len(input)) if n not in identified_scanners]
@@ -53,8 +55,9 @@ def part1(input):
                 unique_vectors, counts = np.unique(beacon_vectors, axis=0, return_counts=True)
                 compare_scanner_pos = None
                 if np.max(counts) >= 12:
-                    print(f"Identified scanner {j} ({len(identified_scanners)+1}/{len(input)} scanners)")
+                    print(f"Identified scanner {j} based on scanner {i} ({len(identified_scanners)+1}/{len(input)} scanners)")
                     compare_scanner_pos = unique_vectors[np.argmax(counts)] # Positon of scanner relative to scanner 0
+                    scanners.append(compare_scanner_pos)
                     rotated_beacons_scanner0 = rotated_beacons + compare_scanner_pos # Compute positions of beacons relative to scanner 0
                     input[j] = rotated_beacons_scanner0
                     identified_scanners.append(j)
@@ -64,11 +67,15 @@ def part1(input):
             if successful_match: break
     # Deduplicate list of all beacons 
     beacons, _ = np.unique(all_beacons, axis=0, return_counts=True)
+    return scanners, beacons
+
+def part1(input):
+    _, beacons = identify_all(input)
     return len(beacons)
 
 def part2(input):
-    result = 0
-    return result
+    scanners, _ = identify_all(input)
+    return max([np.abs(pair[0] - pair[1]).sum() for pair in list(combinations(scanners,2))])
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
