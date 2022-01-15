@@ -2,7 +2,7 @@ import datetime
 from xmlrpc.client import boolean
 import numpy as np
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -16,7 +16,7 @@ def parse_input(input):
     enhance_bits, img =  input.replace('.', '0').replace('#', '1').split('\n\n')
     enhance_bits = np.array(list(map(int, list(enhance_bits))), dtype=np.int8)
     img = np.array([list(map(int, list(r))) for r in img.split('\n')], dtype=np.int8)
-    return enhance_bits, img
+    return img, enhance_bits
 
 # https://stackoverflow.com/questions/41069825/convert-binary-01-numpy-to-integer-or-binary-string
 def bit_arr_2_int(bit_arr):
@@ -35,17 +35,23 @@ def enhance(img, enhance_bits, infinity_bit = 0):
         for c in range(ncol-2):
             i = bit_arr_2_int(img_extended[r:r+3,c:c+3].flatten())
             enhanced_img[r+1,c+1] = enhance_bits[i] 
-    return enhanced_img[1:-1,1:-1] # Trim 4 edges (only zeroes/ ones) by 1 pixel
+    return enhanced_img[1:-1,1:-1] # Trim 4 edges (only zeroes/ ones) by 1 pixel each
+
+# Execute enhancement n times on an input image
+def enhance_loop(img, enhance_bits, n):
+    infinity_bit = 0
+    enhanced_img = np.copy(img)
+    for _ in range(n):
+        enhanced_img = enhance(enhanced_img, enhance_bits, infinity_bit)
+        if(enhance_bits[0] == 1): # Infinity alters between 0 and 1 after each enhancement
+            infinity_bit = 1 if infinity_bit == 0 else 0
+    return enhanced_img
 
 def part1(input):
-    enhance_bits, img = input
-    if(enhance_bits[0] == 0): # Infinity is always 0
-        return np.sum(enhance(enhance(img, enhance_bits), enhance_bits))
-    return np.sum(enhance(enhance(img, enhance_bits, 0), enhance_bits, 1)) # Infinity alters between 0 and 1 after each enhancement
+    return np.sum(enhance_loop(*input, 2)) 
 
 def part2(input):
-    result = 0
-    return result
+    return np.sum(enhance_loop(*input, 50)) 
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
