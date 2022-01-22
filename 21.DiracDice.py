@@ -53,14 +53,18 @@ def recursive_count(p1_pos, p1_score, p2_pos, p2_score, turn):
             new_pos = (p1_pos + dice_val - 1) %10 + 1
             new_score = p1_score + new_pos 
             #print(p1_pos, p1_score, new_pos, new_score, dice_val, DICE_VALUES[dice_val])
-            universe_count[0] += DICE_VALUES[dice_val] * recursive_count(new_pos, new_score, p2_pos, p2_score, 2)[0]
+            universe_result = recursive_count(new_pos, new_score, p2_pos, p2_score, 2)
+            universe_count[0] += DICE_VALUES[dice_val] * universe_result[0]
+            universe_count[1] += DICE_VALUES[dice_val] * universe_result[1]
     else:
         for dice_val in DICE_VALUES:
             new_pos = (p2_pos + dice_val - 1) %10 + 1
             new_score = p2_score + new_pos 
-            universe_count[1] += DICE_VALUES[dice_val] * recursive_count(p1_pos, p1_score, new_pos, new_score, 1)[1]
+            universe_result = recursive_count(p1_pos, p1_score, new_pos, new_score, 1)
+            universe_count[0] += DICE_VALUES[dice_val] * universe_result[0]
+            universe_count[1] += DICE_VALUES[dice_val] * universe_result[1]
     
-    STATE_CACHE[state_key] = universe_count
+    STATE_CACHE[state_key] = universe_count.copy()
     return universe_count
     # 7 unique dice combination * freq of each unique
     # Cache 
@@ -70,13 +74,7 @@ def recursive_count(p1_pos, p1_score, p2_pos, p2_score, turn):
 
 def part2(input):
     p1_pos, p2_pos = input
-    a = recursive_count(p1_pos, 0, p2_pos, 0, 1)
-    print(a)
-    state_keys = list(STATE_CACHE.keys())
-    print(len(state_keys))
-    for k in state_keys[-100:]:
-        print(k, STATE_CACHE[k])
-    return 0
+    return max(recursive_count(p1_pos, 0, p2_pos, 0, 1))
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
