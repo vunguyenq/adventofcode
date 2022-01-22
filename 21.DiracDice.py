@@ -3,7 +3,7 @@ from itertools import product
 from collections import Counter
 
 exec_part = 2 # which part to execute
-exec_test_case = -1 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
+exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
 with open('input/input_test21.txt') as f:
@@ -35,7 +35,8 @@ DICE_VALUES = Counter([sum(c) for c in list(product([1,2,3], repeat = 3))])
 STATE_CACHE = {}
 
 def recursive_count(p1_pos, p1_score, p2_pos, p2_score, turn):
-    # Stop recursion when a player wins
+    # When either player has >=21 score, there is 1 universe for that the winning user wins and 0 universe that the other user wins. 
+    # Stop recursion when a player wins.
     if p1_score >= 21:
         return [1, 0]
     if p2_score >= 21:
@@ -52,25 +53,19 @@ def recursive_count(p1_pos, p1_score, p2_pos, p2_score, turn):
         for dice_val in DICE_VALUES:
             new_pos = (p1_pos + dice_val - 1) %10 + 1
             new_score = p1_score + new_pos 
-            #print(p1_pos, p1_score, new_pos, new_score, dice_val, DICE_VALUES[dice_val])
             universe_result = recursive_count(new_pos, new_score, p2_pos, p2_score, 2)
-            universe_count[0] += DICE_VALUES[dice_val] * universe_result[0]
-            universe_count[1] += DICE_VALUES[dice_val] * universe_result[1]
+            universe_count = [universe_count[i] + DICE_VALUES[dice_val] * universe_result[i] for i in range(len(universe_count))]
     else:
         for dice_val in DICE_VALUES:
             new_pos = (p2_pos + dice_val - 1) %10 + 1
             new_score = p2_score + new_pos 
             universe_result = recursive_count(p1_pos, p1_score, new_pos, new_score, 1)
-            universe_count[0] += DICE_VALUES[dice_val] * universe_result[0]
-            universe_count[1] += DICE_VALUES[dice_val] * universe_result[1]
+            universe_count = [universe_count[i] + DICE_VALUES[dice_val] * universe_result[i] for i in range(len(universe_count))]
     
+    # Any 2 universes having the same state (p1_pos, p1_score, p2_pos, p2_score, turn) will end up at the same final sub-universe count
+    # Cache seen states to avoid recomputation
     STATE_CACHE[state_key] = universe_count.copy()
     return universe_count
-    # 7 unique dice combination * freq of each unique
-    # Cache 
-    # https://www.reddit.com/r/adventofcode/comments/rm7ygy/2021_day_21_part2_could_someone_explain_the/
-    
-
 
 def part2(input):
     p1_pos, p2_pos = input
