@@ -72,7 +72,6 @@ def plane_cut(ax, value, cube):
     return (cube1, cube2)
 
 def part2(input):
-    #input = [t for t in input if t[1][0][0] in range(-50,50)]
     cubes = []
     for (switch, cube) in input:
         # See how the new cube interacts with existing cubes
@@ -80,26 +79,17 @@ def part2(input):
         for c in cubes:
             # Find intersect of the new cube and existing cube 
             intersect = intersect_cube(cube, c)
-            #print('intersect', intersect) #***********
             if intersect is None:
                 new_cubes.append(c)
                 continue
             ((x1, x2), (y1, y2), (z1, z2)) = intersect
             # Cut existing cube by 6 planes of the intersect cube
-            #print('cube', c)
             splitted_cube1, left_over_cube = plane_cut('x', x1, c)
-            #print('leftover1', left_over_cube) #***********
             left_over_cube, splitted_cube2 = plane_cut('x', x2+1, left_over_cube)
-            #print('leftover2', left_over_cube) #***********
             splitted_cube3, left_over_cube = plane_cut('y', y1, left_over_cube)
-            #print('leftover3', left_over_cube) #***********
             left_over_cube, splitted_cube4 = plane_cut('y', y2+1, left_over_cube)
-            #print('leftover4', left_over_cube) #***********
             splitted_cube5, left_over_cube = plane_cut('z', z1, left_over_cube)
-            #print('leftover5', left_over_cube) #***********
             left_over_cube, splitted_cube6 = plane_cut('z', z2+1, left_over_cube)
-            #print('leftover6', left_over_cube) #***********
-            #print('leftover6 == intersect:', left_over_cube == intersect)
             new_cubes.extend([i for i in [splitted_cube1, splitted_cube2, splitted_cube3, splitted_cube4, splitted_cube5, splitted_cube6] if i is not None])
         
         cubes = new_cubes.copy()
