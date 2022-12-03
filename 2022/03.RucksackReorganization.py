@@ -1,7 +1,7 @@
 import datetime
 import os
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -30,7 +30,12 @@ def part1(input):
     return sum(priorities)
 
 def part2(input):
-    return 0
+    priorities = []
+    for i in range(0, len(input), 3):
+        c1, c2, c3 = [set(c) for c in input[i: i+3]]
+        common_item = c1.intersection(c2).intersection(c3).pop()
+        priorities.append(get_priority(common_item))
+    return sum(priorities)
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
