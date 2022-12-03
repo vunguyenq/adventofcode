@@ -1,5 +1,7 @@
 # Code repository for coding challenge adventofcode2021  
-This repository contains code and puzzle inputs for Advent of Code 2021: https://adventofcode.com/2021
+This repository contains code and puzzle inputs for Advent of Code: https://adventofcode.com
+
+To add a new year folder, set YEAR variable in Makefile.
 
 Run make on a BASH shell to create code template for each day challenge.  
   
