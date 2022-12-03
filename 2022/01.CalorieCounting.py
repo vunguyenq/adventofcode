@@ -1,19 +1,22 @@
 import datetime
+import os
 
 exec_part = 1 # which part to execute
 exec_test_case = -1 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
-with open('input/input_test01.txt') as f:
+dirname = os.path.dirname(__file__)
+with open(os.path.join(dirname, 'input/input_test01.txt')) as f:
     INPUT_TEST = f.read()
 
-with open('input/input01.txt') as f:
+with open(os.path.join(dirname, 'input/input01.txt')) as f:
     INPUT = f.read()   
 
 def parse_input(input):
     return input.split('\n')
 
 def part1(input):
+    print(input)
     result = 0
     return result
 
