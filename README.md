@@ -1,4 +1,4 @@
-# Code repository for coding challenge adventofcode2021  
+# Code repository for coding challenge adventofcode  
 This repository contains code and puzzle inputs for Advent of Code: https://adventofcode.com
 
 To add a new year folder, set YEAR variable in Makefile.
