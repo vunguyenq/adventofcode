@@ -16,12 +16,10 @@ def parse_input(input):
     return input.split('\n')
 
 def part1(input):
-    result = 0
-    return result
+    return 0
 
 def part2(input):
-    result = 0
-    return result
+    return 0
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
