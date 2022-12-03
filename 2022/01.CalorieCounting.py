@@ -1,7 +1,7 @@
 import datetime
 import os
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -19,8 +19,9 @@ def part1(input):
     return max([sum(elf) for elf in input])
 
 def part2(input):
-    result = 0
-    return result
+    calories = [sum(elf) for elf in input]
+    max_3_elves = sorted(calories)[-3:]
+    return sum(max_3_elves)
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
