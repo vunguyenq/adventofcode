@@ -1,7 +1,7 @@
 import datetime
 import os
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -32,9 +32,22 @@ def part1(input):
         scores.append(score + choices[me])
     return sum(scores)
 
+def get_score(elf, round_result):
+    if round_result == 'Y': # round needs to draw
+        return 3 + elf
+    wins = {1:2, 2:3, 3:1}
+    loses = {1:3, 2:1, 3:2}
+    if round_result == 'X': # I need to lose
+        return loses[elf]
+    return 6 + wins[elf]
+
 def part2(input):
-    result = 0
-    return result
+    choices = {'A': 1, 'B': 2, 'C': 3}
+    scores = []
+    for round in input:
+        elf, round_result = round.split(' ')
+        scores.append(get_score(choices[elf], round_result))
+    return sum(scores)
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
