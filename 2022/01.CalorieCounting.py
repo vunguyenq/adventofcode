@@ -2,7 +2,7 @@ import datetime
 import os
 
 exec_part = 1 # which part to execute
-exec_test_case = -1 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
+exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
 dirname = os.path.dirname(__file__)
@@ -13,12 +13,10 @@ with open(os.path.join(dirname, 'input/input01.txt')) as f:
     INPUT = f.read()   
 
 def parse_input(input):
-    return input.split('\n')
+    return [[int(i) for i in elf.split('\n')] for elf in input.split('\n\n')]
 
 def part1(input):
-    print(input)
-    result = 0
-    return result
+    return max([sum(elf) for elf in input])
 
 def part2(input):
     result = 0
