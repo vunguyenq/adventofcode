@@ -1,7 +1,7 @@
 import datetime
 import os
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -27,16 +27,16 @@ def range_contain(r1, r2):
         return True
     return False
 
-def range_intersect(r1, r2):
+def range_overlap(r1, r2):
     r1 = set(range(r1[0], r1[1]+1))
     r2 = set(range(r2[0], r2[1]+1))
-    return r1.intersection(r2)
+    return len(r1.intersection(r2)) > 0
 
 def part1(input):
     return sum([range_contain(*p) for p in input])
 
 def part2(input):
-    return 0
+    return sum([range_overlap(*p) for p in input])
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
