@@ -2,7 +2,7 @@ import datetime
 import os
 from collections import deque
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -22,24 +22,32 @@ def parse_input(input):
             if (i-1) % 4 == 0 and c.isalpha():
                 col = (i-1) // 4 + 1
                 all_boxes[col].insert(0, c)
-    all_boxes = [deque(col) for col in all_boxes]
 
     moves = [tuple(map(int, m.replace('move ', '').replace('from ', '').replace('to ', '').split(' '))) for m in moves_raw.split('\n')]
     return all_boxes, moves
 
-def move_boxes(all_boxes, moves):
+def move_boxes_part_1(all_boxes, moves):
     for nbox, from_col, to_col in moves:
         for _ in range(nbox):
             box = all_boxes[from_col].pop()
             all_boxes[to_col].append(box)
 
+def move_boxes_part_2(all_boxes, moves):
+    for nbox, from_col, to_col in moves:
+        moved_boxes = all_boxes[from_col][-nbox:]
+        all_boxes[from_col] = all_boxes[from_col][:-nbox]
+        all_boxes[to_col].extend(moved_boxes)
+
 def part1(input):
     all_boxes, moves = input
-    move_boxes(all_boxes, moves)
+    all_boxes = [deque(col) for col in all_boxes]
+    move_boxes_part_1(all_boxes, moves)
     return ''.join([col.pop() for col in all_boxes if len(col) > 0])
 
 def part2(input):
-    return 0
+    all_boxes, moves = input
+    move_boxes_part_2(all_boxes, moves)
+    return ''.join([col[-1] for col in all_boxes if len(col) > 0])
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
