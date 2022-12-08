@@ -82,9 +82,7 @@ def parse_input(input):
             raise Exception(f'Unknown command: {cmd_line}')
     return root_node
 
-
-def part1(input):
-    root = input
+def get_all_folder_size(root):
     folder_stack = deque([root])
     folder_sizes = []
     while(len(folder_stack) > 0): # DFS to traverse tree
@@ -92,7 +90,10 @@ def part1(input):
         subfolders = [f for f in folder.child_nodes if f.type == 'folder']
         folder_stack.extend(subfolders)
         folder_sizes.append(folder.get_size())
-    return sum([s for s in folder_sizes if s < 100000])
+    return folder_sizes
+
+def part1(input):
+    return sum([s for s in get_all_folder_size(input) if s < 100000])
 
 def part2(input):
     return 0
