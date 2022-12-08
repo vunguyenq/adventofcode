@@ -1,0 +1,3 @@
+Day 07:
+- Implement a simple tree structure
+- Depth-first search with stack
