@@ -2,7 +2,7 @@ import datetime
 import os
 from collections import deque
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -96,7 +96,9 @@ def part1(input):
     return sum([s for s in get_all_folder_size(input) if s < 100000])
 
 def part2(input):
-    return 0
+    root = input
+    min_freeup_space = 30000000 - (70000000 - root.get_size())
+    return [f for f in sorted(get_all_folder_size(root)) if f > min_freeup_space][0]
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
