@@ -37,7 +37,7 @@ def check_visible(r, c, tree_map):
     return False
 
 def get_distance(val, lst):
-    "Get index of first element from left of lst that are >= val"
+    "Get number of elements from left of lst that are < val"
     for i in range(len(lst)):
         if lst[i] >= val:
             return i+1
