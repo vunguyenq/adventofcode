@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -22,15 +22,33 @@ def max_list(lst):
         return -1
     return max(lst)
 
-def check_visible(r, c, tree_map):
-    tree = tree_map[r,c]
+def get_surrounding_trees(r, c, tree_map):
     left_trees = tree_map[r,:c]
     right_trees = tree_map[r,c+1:]
     up_trees = tree_map[:r,c]
     down_trees = tree_map[r+1:,c]
+    return left_trees, right_trees, up_trees, down_trees
+
+def check_visible(r, c, tree_map):
+    tree = tree_map[r,c]
+    left_trees, right_trees, up_trees, down_trees = get_surrounding_trees(r, c, tree_map)
     if (max_list(left_trees) < tree or max_list(right_trees) < tree or max_list(up_trees) < tree or max_list(down_trees) < tree):
         return True
     return False
+
+def get_distance(val, lst):
+    "Get index of first element from left of lst that are >= val"
+    for i in range(len(lst)):
+        if lst[i] >= val:
+            return i+1
+    return len(lst)
+
+def get_scenic_score(r, c, tree_map):
+    tree = tree_map[r,c]
+    left_trees, right_trees, up_trees, down_trees = get_surrounding_trees(r, c, tree_map)
+    left_trees = np.flip(left_trees)
+    up_trees = np.flip(up_trees)
+    return get_distance(tree, left_trees) * get_distance(tree, right_trees) * get_distance(tree, up_trees) * get_distance(tree, down_trees)
 
 def part1(input):
     visible_trees = 0
@@ -41,7 +59,11 @@ def part1(input):
     return visible_trees
 
 def part2(input):
-    return 0
+    scenic_scores = []
+    for r in range(input.shape[0]):
+        for c in range(input.shape[1]):
+            scenic_scores.append(get_scenic_score(r, c, input))
+    return max(scenic_scores)
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
