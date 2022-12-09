@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -54,8 +54,52 @@ def part1(input):
             tail_positions.append(tuple(rope.tail))
     return len(set(tail_positions))
 
+
+class LongRope():
+    def __init__(self, head_pos, length) -> None:
+        self.head = head_pos
+        self.knots = [head_pos] + [np.copy(head_pos) for _ in range(length-1)]
+
+    def move_head(self, direction):
+        direction_map = {
+            'U': np.array([-1, 0]),
+            'D': np.array([1, 0]),
+            'L': np.array([0, -1]),
+            'R': np.array([0, 1]),
+        }
+        self.head += direction_map[direction]
+        self._move_all_knots()
+
+    def _is_touching(self, head_knot, tail_knot):
+        "Returns True if tail_knot is in a touching position with head_know, False otherwise"
+        if np.max(np.abs(head_knot - tail_knot)) <= 1: # Overlap or adjacent
+            return True
+        return False
+
+    def _move_knot(self, head_knot, tail_knot): # Move tail_knot towards head_knot
+        if not(self._is_touching(head_knot, tail_knot)):
+            row_step = head_knot[0] - tail_knot[0]
+            row_step = row_step // abs(row_step) if row_step != 0 else row_step
+            col_step = head_knot[1] - tail_knot[1]
+            col_step = col_step // abs(col_step) if col_step != 0 else col_step
+            tail_knot += np.array([row_step, col_step])
+
+    def _move_all_knots(self):
+        for i in range(1, len(self.knots)):
+            self._move_knot(self.knots[i-1], self.knots[i])
+
+    def get_tail(self):
+        return self.knots[-1]
+
+
 def part2(input):
-    return 0
+    rope = LongRope(np.array([0, 0]), 10)
+    tail_positions = []
+    for direction, steps in input:
+        for _ in range(steps):
+            rope.move_head(direction)
+            tail_positions.append(tuple(rope.get_tail()))
+    return len(set(tail_positions))
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
