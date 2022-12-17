@@ -1,7 +1,11 @@
 import datetime
 import os
 
-exec_part = 1 # which part to execute
+import libraries.simpleframe as sf
+import numpy as np
+from libraries.simpleframe import SimpleFrame
+
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -50,14 +54,59 @@ class CPU():
 
 def part1(input):
     cpu = CPU(input)
-    signal_strength =0
+    signal_strength = 0
     for c in range(1, 221):
         res = cpu.tick()
         if c in [20, 60, 100, 140, 180, 220] and res is not None:
             signal_strength += c * res[0]
     return signal_strength
 
+
+class Screen(SimpleFrame):
+    def _draw_sprite(self, sprite, row, lit_pixel):
+        self.draw_tile((sprite[0], row), sf.RED)
+        if lit_pixel:
+            self.draw_tile((sprite[1], row), sf.GREEN)
+        else:
+            self.draw_tile((sprite[1], row), sf.RED)
+        self.draw_tile((sprite[2], row), sf.RED)
+
+    def _draw_screen(self, screen_pos):
+        for r in range(screen_pos.shape[0]):
+            for c in range(screen_pos.shape[1]):
+                if (screen_pos[r][c] == 1):
+                    self.draw_tile((c, r), sf.BLUE)
+
+    def draw(self, cpu):
+        screen_pos = np.zeros((6, 40), dtype=int)
+        for r in range(screen_pos.shape[0]):
+            for c in range(screen_pos.shape[1]):
+                sprite_pos = cpu.tick()
+                if sprite_pos is None: 
+                    break
+                sprite = range(sprite_pos[0] - 1, sprite_pos[0] + 2)
+                lit_pixel = False
+                if c in sprite:
+                    screen_pos[r][c] = 1
+                    lit_pixel = True
+                self.reset_background()
+                self._draw_sprite(sprite, r, lit_pixel)
+                self._draw_screen(screen_pos)
+                self.refresh()
+                self.check_closed()
+
+        self.reset_background()
+        self._draw_screen(screen_pos)
+        self.refresh()
+        
+        while(True):
+            self.check_closed()
+
 def part2(input):
+    cpu = CPU(input)
+    screen = Screen(tile_size = 20, frame_rate=0.05)
+    screen.set_title("Cathode screen")
+    screen.draw(cpu)
     return 0
 
 if __name__ == "__main__":
