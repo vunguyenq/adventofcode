@@ -98,13 +98,13 @@ class Screen(SimpleFrame):
         self.reset_background()
         self._draw_screen(screen_pos)
         self.refresh()
-        
+
         while(True):
             self.check_closed()
 
 def part2(input):
     cpu = CPU(input)
-    screen = Screen(tile_size = 20, frame_rate=0.05)
+    screen = Screen(width = 1000, height = 400, tile_size = 20, frame_rate=0.05)
     screen.set_title("Cathode screen")
     screen.draw(cpu)
     return 0
