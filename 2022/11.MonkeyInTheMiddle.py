@@ -1,7 +1,8 @@
 import datetime
+import math
 import os
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -17,16 +18,26 @@ class Monkey:
         self.items = items
         self.operation = operation
         self.test_division = test_division
+        self.worry_dividen = 3
+        self.worry_control = None
         self.items_inspected = 0
 
     def set_catching_monkeys(self, monkey_if_true, monkey_if_false):
         self.monkey_if_true = monkey_if_true
         self.monkey_if_false = monkey_if_false
 
+    def set_worry_dividen(self, worry_dividen):
+        self.worry_dividen = worry_dividen
+    
+    def set_worry_control(self, worry_control):
+        self.worry_control = worry_control
+
     def inspect_next_item(self):
         if len(self.items) > 0:
             old = self.items.pop(0)
-            item = eval(self.operation) // 3
+            item = (eval(self.operation)) // self.worry_dividen
+            if self.worry_control is not None:
+                item = item % self.worry_control
             if item % self.test_division == 0:
                 self.throw_item(item, self.monkey_if_true)
             else:
@@ -75,8 +86,18 @@ def part1(input):
     inspect_counts = sorted([m.items_inspected for m in monkeys])
     return inspect_counts[-1] * inspect_counts[-2]
 
+# I didn't figure out how to keep worry level of items from growing to big after each inspection.
+# Implemented the hint by reddit.com/user/Rangsk/ in this thread https://www.reddit.com/r/adventofcode/comments/zihouc/2022_day_11_part_2_might_need_to_borrow_a_nasa/
 def part2(input):
-    return 0
+    monkeys = input
+    worry_control = math.prod([m.test_division for m in monkeys])
+    for m in monkeys:
+        m.set_worry_dividen(1)
+        m.set_worry_control(worry_control)
+    for r in range(10000):
+        process_one_round(monkeys)
+    inspect_counts = sorted([m.items_inspected for m in monkeys])
+    return inspect_counts[-1] * inspect_counts[-2]
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
