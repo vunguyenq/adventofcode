@@ -5,3 +5,4 @@ Day 12:
 - Practice directed graph + shortest path with networkx
 Day 13:
 - Practice recursion
+- Sort list with custom element compare function

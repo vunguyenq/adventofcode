@@ -1,7 +1,8 @@
 import datetime
 import os
+from functools import cmp_to_key
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -50,8 +51,13 @@ def part1(input):
     return sum(right_order_pairs)
 
 def part2(input):
-    print(input)
-    return 0
+    packets = [packet for pair in input for packet in pair] + [[[2]], [[6]]]
+    sorted_packets = sorted(packets, key=cmp_to_key(compare), reverse=True)
+    decoder_key = 1
+    for i, p in enumerate(sorted_packets):
+        if str(p) in ['[[2]]', '[[6]]']:
+            decoder_key *= (i+1)
+    return decoder_key
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
