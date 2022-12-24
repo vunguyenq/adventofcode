@@ -18,15 +18,15 @@ def parse_input(input):
 def compare(left, right):
     """
         Recursively compare 2 values left and right
-        Return True if values come in the right order, False if not, None if cannot decide.
+        Return 1 if values come in the right order, -1 if not, 0 if cannot decide.
     """
     if type(left) is int and type(right) is int:
         if left < right:
-            return True
+            return 1
         elif left > right:
-            return False
+            return -1
         else:
-            return None
+            return 0
     if type(left) is int and type(right) is list:
         return compare([left], right)
     if type(left) is list and type(right) is int:
@@ -34,22 +34,23 @@ def compare(left, right):
     # left and right are both lists
     for i in range(len(left)):
         if i == len(right): # right runs out of items first
-            return False
+            return -1
         compare_element = compare(left[i], right[i])
-        if compare_element is not None:
+        if compare_element != 0:
             return compare_element
     if len(left) < len(right): # left runs out of items first
-        return True
-    return None
+        return 1
+    return 0
 
 def part1(input):
     right_order_pairs =[]
     for i, pair in enumerate(input):
-        if(compare(*pair)):
+        if(compare(*pair) == 1):
             right_order_pairs.append(i+1)
     return sum(right_order_pairs)
 
 def part2(input):
+    print(input)
     return 0
 
 if __name__ == "__main__":
