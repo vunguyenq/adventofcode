@@ -1,3 +1,7 @@
 Day 07:
 - Implement a simple tree structure
 - Depth-first search with stack
+Day 12:
+- Practice directed graph + shortest path with networkx
+Day 13:
+- Practice recursion
