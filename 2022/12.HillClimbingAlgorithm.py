@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-exec_part = 1 # which part to execute
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -39,14 +39,22 @@ def parse_input(input):
                     continue
                 if height_map[r, c] + 1  >= height_map[a]:
                     G.add_edge((r,c), a)
-    return G, tuple([e[0] for e in source_pos]), tuple([e[0] for e in dest_pos])
+    return G, list(zip(*source_pos))[0], list(zip(*dest_pos))[0], height_map
 
 def part1(input):
-    G, source_pos, dest_pos = input
+    G, source_pos, dest_pos, _ = input
     return len(nx.shortest_path(G, source=source_pos, target=dest_pos)) - 1
 
 def part2(input):
-    return 0
+    G, _, dest_pos, height_map = input
+    path_lengths = []
+    lowest_positions = tuple(np.where(height_map == ord('a')))
+    for source_pos in (list(zip(*lowest_positions))):
+        try:
+            path_lengths.append(len(nx.shortest_path(G, source=source_pos, target=dest_pos)) - 1)
+        except nx.NetworkXNoPath:
+            continue
+    return min(path_lengths)
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
