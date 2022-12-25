@@ -5,8 +5,8 @@ import libraries.simpleframe as sf
 import numpy as np
 from libraries.simpleframe import SimpleFrame
 
-exec_part = 1 # which part to execute
-exec_test_case = -1 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
+exec_part = 2 # which part to execute
+exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
 dirname = os.path.dirname(__file__)
@@ -39,9 +39,9 @@ class Sand:
     _DOWNLEFT = np.array([1, -1])
     _DOWNRIGHT = np.array([1, 1])
     
-    def __init__(self, sceen = None) -> None:
-        self.pos = np.array([0, 500])
-        self.screen = sceen
+    def __init__(self, starting_pos = np.array([0, 500]), screen = None) -> None:
+        self.pos = starting_pos
+        self.screen = screen
 
     def _move_one_step(self, direction, sand_map):
         """
@@ -97,9 +97,9 @@ class Screen(SimpleFrame):
 def part1(input):
     sand_map = input
     screen = Screen(width = 1500, height = 800, tile_size = 4, frame_rate=0.01)
-    screen.set_title("Day 14: Regolith Reservoir")
+    screen.set_title("Day 14: Regolith Reservoir part 1")
     while(True):
-        s = Sand(screen) # Initialize Sand with a Screen object to visualize
+        s = Sand(screen=screen) # Initialize Sand with a Screen object to visualize
         # s = Sand()
         rest_pos = s.fall(sand_map)
         if rest_pos is None:
@@ -109,8 +109,35 @@ def part1(input):
 
 def part2(input):
     sand_map = input
+        
+    # Expand map to ADD_COLS cols each size + 2 rows in the bottom
+    ADD_COLS = 200
+    additional_cols = np.zeros((sand_map.shape[0], ADD_COLS), dtype=np.dtype('u1'))
+    empty_row = np.zeros((1, sand_map.shape[1] + ADD_COLS*2), dtype=np.dtype('u1'))
+    floor_row = np.ones((1, sand_map.shape[1] + ADD_COLS*2), dtype=np.dtype('u1'))
+    sand_map = np.concatenate([additional_cols, np.copy(sand_map), additional_cols], axis=1)
+    sand_map = np.concatenate([sand_map, empty_row], axis=0)
+    sand_map = np.concatenate([sand_map, floor_row], axis=0)
 
-    return 0
+    # screen = Screen(width = 1500, height = 800, tile_size = 3, frame_rate=0.01)
+    # screen.set_title("Day 14: Regolith Reservoir part 2")
+    sand_pos = np.array([0, 500+ADD_COLS])
+    i = 0
+    while(True):
+        s = Sand(starting_pos=sand_pos)
+        rest_pos = s.fall(sand_map)
+        if tuple(rest_pos) == tuple(sand_pos):
+            break
+        sand_map[tuple(rest_pos)] = 2
+
+        # # Visualize
+        # screen.draw(sand_map, sand_pos)
+
+        # Progress tracker
+        i += 1
+        if (i%1000) == 0:
+            print(f'Sand {i}th falling, rests at position {tuple(rest_pos)}')
+    return np.count_nonzero(sand_map == 2) + 1
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
