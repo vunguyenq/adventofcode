@@ -81,21 +81,22 @@ class Sand:
                 return self.pos
 
 class Screen(SimpleFrame):
+    _SHIFT_COL = -300
     def draw(self, sand_map, sand_pos):
         self.reset_background()
-        self.draw_tile((sand_pos[1], sand_pos[0]), sf.RED)
+        self.draw_tile((sand_pos[1] + self._SHIFT_COL, sand_pos[0]), sf.RED)
         for r in range(sand_map.shape[0]):
             for c in range(sand_map.shape[1]):
                 if sand_map[r, c] == 1:
-                    self.draw_tile((c, r), sf.BLUE)
+                    self.draw_tile((c + self._SHIFT_COL, r), sf.BLUE)
                 elif sand_map[r,c] == 2:
-                    self.draw_tile((c, r), sf.RED)
+                    self.draw_tile((c + self._SHIFT_COL, r), sf.RED)
         self.refresh()
         self.check_closed()
 
 def part1(input):
     sand_map = input
-    screen = Screen(width = 2000, height = 500, tile_size = 3, frame_rate=0.01)
+    screen = Screen(width = 1500, height = 800, tile_size = 4, frame_rate=0.01)
     screen.set_title("Day 14: Regolith Reservoir")
     while(True):
         s = Sand(screen) # Initialize Sand with a Screen object to visualize
@@ -107,6 +108,8 @@ def part1(input):
     return np.count_nonzero(sand_map == 2)
 
 def part2(input):
+    sand_map = input
+
     return 0
 
 if __name__ == "__main__":
