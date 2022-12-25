@@ -1,10 +1,12 @@
 import datetime
 import os
 
+import libraries.simpleframe as sf
 import numpy as np
+from libraries.simpleframe import SimpleFrame
 
 exec_part = 1 # which part to execute
-exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
+exec_test_case = -1 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
 dirname = os.path.dirname(__file__)
@@ -37,16 +39,19 @@ class Sand:
     _DOWNLEFT = np.array([1, -1])
     _DOWNRIGHT = np.array([1, 1])
     
-    def __init__(self) -> None:
+    def __init__(self, sceen = None) -> None:
         self.pos = np.array([0, 500])
+        self.screen = sceen
 
     def _move_one_step(self, direction, sand_map):
         """
             Move sand one step on direction vector.
             Returns new position of sand if movable, None if unmovable, 'fall' if sand falls off boundaries.
         """
+        if self.screen is not None:
+            self.screen.draw(sand_map, self.pos)
+
         new_pos = self.pos + direction
-        # print(self.pos, new_pos)
         if new_pos[0] < 0 or new_pos[1] < 0 or new_pos[0] >= sand_map.shape[0] or new_pos[1] >= sand_map.shape[1]:
             return 'fall'
         if sand_map[tuple(new_pos)] > 0: # a rock or another sand already at new_pos
@@ -75,12 +80,26 @@ class Sand:
             if rest:
                 return self.pos
 
+class Screen(SimpleFrame):
+    def draw(self, sand_map, sand_pos):
+        self.reset_background()
+        self.draw_tile((sand_pos[1], sand_pos[0]), sf.RED)
+        for r in range(sand_map.shape[0]):
+            for c in range(sand_map.shape[1]):
+                if sand_map[r, c] == 1:
+                    self.draw_tile((c, r), sf.BLUE)
+                elif sand_map[r,c] == 2:
+                    self.draw_tile((c, r), sf.RED)
+        self.refresh()
+        self.check_closed()
 
 def part1(input):
     sand_map = input
-    i = 0
+    screen = Screen(width = 2000, height = 500, tile_size = 3, frame_rate=0.01)
+    screen.set_title("Day 14: Regolith Reservoir")
     while(True):
-        s = Sand()
+        s = Sand(screen) # Initialize Sand with a Screen object to visualize
+        # s = Sand()
         rest_pos = s.fall(sand_map)
         if rest_pos is None:
             break
