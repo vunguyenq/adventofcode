@@ -6,3 +6,5 @@ Day 12:
 Day 13:
 - Practice recursion
 - Sort list with custom element compare function
+Day 15:
+- 2D polygons clipping (and, or, xor etc.) using shapely library

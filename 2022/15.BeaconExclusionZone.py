@@ -1,8 +1,11 @@
 import datetime
 import os
 import re
+from itertools import product
 
-exec_part = 1 # which part to execute
+from shapely.geometry import MultiPolygon, Polygon
+
+exec_part = 2 # which part to execute
 exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -25,9 +28,9 @@ class Sensor():
         self.beacon_pos = closest_beacon_pos
         self.dist = manhattan_distance(pos, closest_beacon_pos)
         x, y = pos
-        self.cover_area = ((x-self.dist, y), (x+self.dist, y), (x, y-self.dist), (x, y+self.dist))
+        self.cover_area = ((x-self.dist, y), (x, y-self.dist), (x+self.dist, y), (x, y+self.dist))
     
-    def is_covered(self, pos):
+    def covers(self, pos):
         '''Check if a position (x,y) is in coverage area of sensor'''
         if manhattan_distance(self.pos, pos) <= self.dist:
             return True
@@ -66,7 +69,40 @@ def part1(input):
     return len(set(unique_points))
 
 def part2(input):
-    return 0
+    space_size = 4000000
+    sensors = input
+    # Start with entire seach space as a square.
+    # In each iteration, clip cover area of each sensor away from the search space
+    search_space = Polygon([(0, 0), (0, space_size), (space_size, space_size), (space_size, 0)])
+    for sensor in sensors:
+        area = Polygon(sensor.cover_area)
+        search_space = search_space.difference(area)
+    
+    # Returned search space is one or multiple polygons with float vertices
+    # Get all inner points of these polygons considering integer rounding. These are candidates for distress beacon position
+    x_candidates = set()
+    y_candidates = set()
+    if isinstance(search_space, MultiPolygon):
+        uncovered_areas = search_space.geoms
+    else:  # seach space is a single Polygon
+        uncovered_areas = [search_space]
+
+    for polygon in uncovered_areas:
+        for x, y in polygon.exterior.coords:
+            x_candidates = x_candidates.union(set([int(x), int(x)+1, int(x)-1]))
+            y_candidates = y_candidates.union(set([int(y), int(y)+1, int(y)-1]))
+            candidate_positions = list(product(x_candidates, y_candidates))
+
+    # Check if each candidate position is covered by any sensor
+    covered_positions = []
+    for pos in candidate_positions:
+        for sensor in sensors:
+            if sensor.covers(pos):
+                covered_positions.append(pos)
+                break
+
+    beacon_pos = set(candidate_positions).difference(set(covered_positions)).pop()
+    return f"\n\tCandidate positions: {candidate_positions}\n\tBeacon position: {beacon_pos}\n\tPart 2 answer: {beacon_pos[0] * 4000000 + beacon_pos[1]}"
 
 if __name__ == "__main__":
     if(exec_test_case == 0):
