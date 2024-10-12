@@ -10,7 +10,7 @@ help:
 	echo Delete day: make delete day=01
 
 create:
-	touch ./${YEAR}/input/input$(word 1, $(dayname)).txt
+	mkdir ./${YEAR}/input -p && touch ./${YEAR}/input/input$(word 1, $(dayname)).txt
 	touch ./${YEAR}/input/input_test$(word 1, $(dayname)).txt
 	cp code-template.py ${YEAR}/$(word 1, $(dayname)).$(word 2, $(dayname)).py
 	sed -i 's/INPUT_TEST_FILE/input_test$(word 1, $(dayname))/g' ${YEAR}/$(word 1, $(dayname)).$(word 2, $(dayname)).py
