@@ -2,7 +2,7 @@ import datetime
 import os
 
 exec_part = 1  # which part to execute
-exec_test_case = -1  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
+exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
 dirname = os.path.dirname(__file__)
@@ -12,14 +12,17 @@ with open(os.path.join(dirname, 'input/input_test01.txt')) as f:
 with open(os.path.join(dirname, 'input/input01.txt')) as f:
     INPUT = f.read()
 
-
 def parse_input(input):
     return input.split('\n')
 
+def find_first_numeric(s):
+    return next((char for char in s if char.isdigit()), None)
+
+def find_last_numeric(s):
+    return next((char for char in reversed(s) if char.isdigit()), None)
 
 def part1(input):
-    return 0
-
+    return sum([int(f"{find_first_numeric(r)}{find_last_numeric(r)}") for r in input])
 
 def part2(input):
     return 0
@@ -40,7 +43,7 @@ if __name__ == "__main__":
         elif (exec_test_case == -1):
             print(f"Running test case {i+1}/{len(inputs)}...")
         else:
-            if (i+1 == exec_test_case):
+            if (i + 1 == exec_test_case):
                 print(f"Running test case {i+1}/{len(inputs)}...")
             else:
                 continue
