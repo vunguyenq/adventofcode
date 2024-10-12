@@ -1,7 +1,7 @@
 import datetime
 import os
 
-exec_part = 1  # which part to execute
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -29,16 +29,24 @@ def part1(input):
     impossible_games = []
     for i, game in enumerate(input):
         for game_set in game:
-            reds = int(game_set['red']) if 'red' in game_set else 0
-            greens = int(game_set['green']) if 'green' in game_set else 0
-            blues = int(game_set['blue']) if 'blue' in game_set else 0
+            reds = game_set['red'] if 'red' in game_set else 0
+            greens = game_set['green'] if 'green' in game_set else 0
+            blues = game_set['blue'] if 'blue' in game_set else 0
             if reds > 12 or greens > 13 or blues > 14:
                 impossible_games.append(i + 1)
                 break
     return sum([i for i in range(1, len(input) + 1) if i not in impossible_games])
 
 def part2(input):
-    return 0
+    power = 0
+    for i, game in enumerate(input):
+        reds = greens = blues = 0
+        for game_set in game:
+            reds = max(reds, int(game_set['red']) if 'red' in game_set else 0)
+            greens = max(greens, int(game_set['green']) if 'green' in game_set else 0)
+            blues = max(blues, int(game_set['blue']) if 'blue' in game_set else 0)
+        power += reds * greens * blues
+    return power
 
 
 if __name__ == "__main__":
