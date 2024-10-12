@@ -1,5 +1,5 @@
 .SILENT: help
-YEAR = 2022
+YEAR = 2023
 
 test_param:
 	echo $(param)
