@@ -1,7 +1,7 @@
 import datetime
 import os
 
-exec_part = 1  # which part to execute
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -24,8 +24,17 @@ def find_last_numeric(s):
 def part1(input):
     return sum([int(f"{find_first_numeric(r)}{find_last_numeric(r)}") for r in input])
 
+def replace_text_digits(input):
+    digits = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9}
+    digit_input = []
+    for r in input:
+        for key in digits.keys():
+            r = r.replace(key, f"{key}{str(digits[key])}{key}")  # 'one' -> 'one1one'
+        digit_input.append(r)
+    return digit_input
+
 def part2(input):
-    return 0
+    return sum([int(f"{find_first_numeric(r)}{find_last_numeric(r)}") for r in replace_text_digits(input)])
 
 
 if __name__ == "__main__":
