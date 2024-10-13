@@ -2,7 +2,7 @@ import datetime
 import os
 from typing import NamedTuple
 
-exec_part = 1  # which part to execute
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -28,11 +28,17 @@ def part1(cards):
     points = 0
     for card in cards:
         winning_count = len(set(card.winning_numbers).intersection(set(card.card_numbers)))
-        points = points + 2**(winning_count-1) if winning_count > 0 else points
+        points = points + 2**(winning_count - 1) if winning_count > 0 else points
     return points
 
 def part2(cards):
-    return 0
+    won_cards = {i: 1 for i in range(len(cards))}
+    for i, card in enumerate(cards):
+        winning_count = len(set(card.winning_numbers).intersection(set(card.card_numbers)))
+        winning_cards = tuple(range(i + 1, i + winning_count + 1))
+        for c in winning_cards:
+            won_cards[c] += won_cards[i]
+    return sum(won_cards.values())
 
 
 if __name__ == "__main__":
