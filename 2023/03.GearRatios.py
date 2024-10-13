@@ -2,7 +2,7 @@ import datetime
 import os
 from typing import NamedTuple
 
-exec_part = 1  # which part to execute
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -52,8 +52,32 @@ def part1(input):
             part_numbers.append(int(number.number))
     return sum(part_numbers)
 
+def get_adjacent_stars(schematic, number: Number):
+    adjacent_locations = []
+    adjacent_locations.extend([(number.row - 1, x) for x in range(number.start - 1, number.end + 2)])  # row above
+    adjacent_locations.extend([(number.row + 1, x) for x in range(number.start - 1, number.end + 2)])  # row below
+    adjacent_locations.extend([(number.row, number.start - 1), (number.row, number.end + 1)])  # left and right
+
+    adjacent_stars = []
+    for loc in adjacent_locations:
+        try:
+            if schematic[loc[0]][loc[1]] == '*':
+                adjacent_stars.append(loc)
+        except IndexError:
+            continue
+    return adjacent_stars
+
 def part2(input):
-    return get_numbers(input)
+    numbers = get_numbers(input)
+    stars = {}
+    for number in numbers:
+        for s in get_adjacent_stars(input, number):
+            if s in stars:
+                stars[s]['count'] += 1
+                stars[s]['numbers'].append(number.number)
+            else:
+                stars[s] = {'count': 1, 'numbers': [number.number]}
+    return sum([stars[s]['numbers'][0] * stars[s]['numbers'][1] for s in stars if stars[s]['count'] == 2])
 
 
 if __name__ == "__main__":
