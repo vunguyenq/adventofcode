@@ -91,7 +91,7 @@ def part2(input):
                 destination_ranges.extend([(r[1][0], r[1][1] - r[1][0]) for r in subranges])
             source_ranges = destination_ranges
         all_location_ranges.extend(destination_ranges)
-    return min([x[0] for x in all_location_ranges])
+    return f"Min location: {min([x[0] for x in all_location_ranges])}. Number of location ranges: {len(all_location_ranges)}"
 
 
 if __name__ == "__main__":
