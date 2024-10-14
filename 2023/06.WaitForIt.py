@@ -4,7 +4,7 @@ import math
 import os
 import re
 
-exec_part = 1  # which part to execute
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -16,34 +16,36 @@ with open(os.path.join(dirname, 'input/input06.txt')) as f:
     INPUT = f.read()
 
 def parse_input(input):
-    time, dist = [list(map(int, re.findall(r'\d+', row))) for row in input.split('\n')]
-    return list(zip(time, dist))
+    return input.split('\n')
 
-def count_winning_cases(input):
+def count_winning_cases(time, dist):
     '''
-    Time n=x+y. We need all integer x, y such that P = xy > Distance D.
-    => x(t-x) > D => We need to solve x^2 - tx + D < 0
+    Time t=x+y. We need all integer x, y such that P = xy > Distance D.
+    => x(t-x) > D => We need to solve quadratic inequality f = x^2 - tx + D < 0
     '''
-    all_winning_cases = []
-    for time, dist in input:
-        delta = time ** 2 - 4 * dist
-        if delta <= 0:
-            winning_cases = 0
-        else:
-            x1 = (time + math.sqrt(delta)) / 2
-            x2 = (time - math.sqrt(delta)) / 2
-            x1_int = math.ceil(x1) - 1
-            x2_int = math.floor(x2) + 1
-            winning_cases = x1_int - x2_int + 1
-        all_winning_cases.append(winning_cases)
-    return all_winning_cases
+    delta = time ** 2 - 4 * dist
+    if delta <= 0:
+        winning_cases = 0  # No possible winning cases
+    else:  # Compute 2 real roots x1, x2. f(x) is negative between x1 and x2.
+        x1 = (time + math.sqrt(delta)) / 2
+        x2 = (time - math.sqrt(delta)) / 2
+        x1_int = math.ceil(x1) - 1
+        x2_int = math.floor(x2) + 1
+        winning_cases = x1_int - x2_int + 1
+    return winning_cases
 
 
 def part1(input):
-    return functools.reduce(lambda x, y: x * y, count_winning_cases(input))
+    time_values, dist_values = [list(map(int, re.findall(r'\d+', row))) for row in input]
+    data = list(zip(time_values, dist_values))
+    all_winning_cases = []
+    for time, dist in data:
+        all_winning_cases.append(count_winning_cases(time, dist))
+    return functools.reduce(lambda x, y: x * y, all_winning_cases)
 
 def part2(input):
-    return 0
+    time, dist = [int(re.findall(r'\d+', row.replace(' ', ''))[0]) for row in input]
+    return count_winning_cases(time, dist)
 
 
 if __name__ == "__main__":
