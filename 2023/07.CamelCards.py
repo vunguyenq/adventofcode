@@ -2,8 +2,8 @@ import datetime
 import os
 from collections import Counter
 
-exec_part = 1  # which part to execute
-exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
+exec_part = 2  # which part to execute
+exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
 dirname = os.path.dirname(__file__)
@@ -16,9 +16,10 @@ with open(os.path.join(dirname, 'input/input07.txt')) as f:
 def parse_input(input):
     return [(r.split(' ')[0], int(r.split(' ')[1])) for r in input.split('\n')]
 
-def encode_cards(hand: str) -> str:
+def encode_cards(hand: str, part: int) -> str:
     '''Encode char cards to leverage direct string comparison'''
-    text_cards = {'A': 'Z', 'K': 'Y', 'Q': 'X', 'J': 'W', 'T': 'V'}
+    j_encode = 'W' if part == 1 else '1'
+    text_cards = {'A': 'Z', 'K': 'Y', 'Q': 'X', 'J': j_encode, 'T': 'V'}
     return ''.join([text_cards.get(c, c) for c in hand])
 
 def hand_type(hand: str) -> str:
@@ -42,11 +43,24 @@ def hand_type(hand: str) -> str:
         return 1  # High card
 
 def part1(input):
-    sorted_hands = sorted([(encode_cards(hand), hand_type(hand), bet) for hand, bet in input], key=lambda x: (x[1], x[0]))
+    sorted_hands = sorted([(encode_cards(hand, part=1), hand_type(hand), bet) for hand, bet in input], key=lambda x: (x[1], x[0]))
     return sum([(i + 1) * h[2] for i, h in enumerate(sorted_hands)])
 
+def impersonate_joker(hand: str) -> str:
+    '''Replace the Joker with all possible cards int the hand and return the best hand'''
+    if 'J' not in hand:
+        return hand
+    other_cards = [c for c in hand if c != 'J']
+    best_hand = hand
+    for c in other_cards:
+        impersonated_hand = hand.replace('J', c)
+        if hand_type(impersonated_hand) > hand_type(best_hand):
+            best_hand = impersonated_hand
+    return best_hand
+
 def part2(input):
-    return 0
+    sorted_hands = sorted([(encode_cards(hand, part=2), hand_type(impersonate_joker(hand)), bet, hand) for hand, bet in input], key=lambda x: (x[1], x[0]))
+    return sum([(i + 1) * h[2] for i, h in enumerate(sorted_hands)])
 
 
 if __name__ == "__main__":
