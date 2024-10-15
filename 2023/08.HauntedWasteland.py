@@ -1,8 +1,10 @@
 import datetime
+import math
 import os
+from functools import reduce
 from itertools import cycle
 
-exec_part = 1  # which part to execute
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -39,8 +41,64 @@ def part1(input):
         steps += 1
     return steps
 
+def eda_part2(input, max_visited_end_nodes=4):
+    '''
+    Exploratory Data Analysis. Run this function to understand the pattern in part 2.
+
+    Sample run with max_visited_end_nodes = 4
+    TTA [(1, 'KHZ', 15871), (2, 'KHZ', 31742), (3, 'KHZ', 47613), (4, 'KHZ', 63484)]
+    KJA [(1, 'KRZ', 19637), (2, 'KRZ', 39274), (3, 'KRZ', 58911), (4, 'KRZ', 78548)]
+    BGA [(1, 'HSZ', 12643), (2, 'HSZ', 25286), (3, 'HSZ', 37929), (4, 'HSZ', 50572)]
+    AAA [(1, 'ZZZ', 14257), (2, 'ZZZ', 28514), (3, 'ZZZ', 42771), (4, 'ZZZ', 57028)]
+    LTA [(1, 'DXZ', 21251), (2, 'DXZ', 42502), (3, 'DXZ', 63753), (4, 'DXZ', 85004)]
+    NJA [(1, 'HRZ', 19099), (2, 'HRZ', 38198), (3, 'HRZ', 57297), (4, 'HRZ', 76396)]
+
+    Observation: For every start node, it always takes a fixed number of steps (from start node to end node)
+                 and then (from this first end node back to the same end node the 2nd time) and so on. Name this the cycle length.
+    Conclusion: answer for part 2 is the LCM of all cycle lengths.
+    '''
+    instructions, nodes = input
+    current_nodes = [n for n in nodes.keys() if n[-1] == 'A']
+    end_nodes = [n for n in nodes.keys() if n[-1] == 'Z']
+
+    for node in current_nodes:
+        steps = 0
+        current_node = node
+
+        n_visited_end_nodes = 0
+        visited_end_nodes = []
+
+        while True:
+            instruction = next(instructions)
+            current_node = nodes[current_node].left_node if instruction == 'L' else nodes[current_node].right_node
+            steps += 1
+            if current_node in (end_nodes):
+                n_visited_end_nodes += 1
+                visited_end_nodes.append((n_visited_end_nodes, current_node, steps))
+                if n_visited_end_nodes == max_visited_end_nodes:
+                    break
+        print(node, visited_end_nodes)
+
+def find_cycle_length(node, input):
+    instructions, nodes = input
+    end_nodes = [n for n in nodes.keys() if n[-1] == 'Z']
+    current_node = node
+    steps = 0
+    while current_node not in end_nodes:
+        instruction = next(instructions)
+        current_node = nodes[current_node].left_node if instruction == 'L' else nodes[current_node].right_node
+        steps += 1
+    return steps
+
 def part2(input):
-    return 0
+    # eda_part2(input, 10)
+    nodes = input[1]
+    start_nodes = [n for n in nodes.keys() if n[-1] == 'A']
+    cycle_lengths = [find_cycle_length(node, input) for node in start_nodes]
+
+    def lcm_list(numbers):  # Least Common Multiple of a list of numbers
+        return reduce(lambda a, b: a * b // math.gcd(a, b), numbers)
+    return lcm_list(cycle_lengths)
 
 
 if __name__ == "__main__":
