@@ -3,7 +3,7 @@ import os
 from collections import Counter
 
 exec_part = 2  # which part to execute
-exec_test_case = 0 # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
+exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
 dirname = os.path.dirname(__file__)
