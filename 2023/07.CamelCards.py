@@ -47,7 +47,7 @@ def part1(input):
     return sum([(i + 1) * h[2] for i, h in enumerate(sorted_hands)])
 
 def impersonate_joker(hand: str) -> str:
-    '''Replace the Joker with all possible cards int the hand and return the best hand'''
+    '''Replace the Joker with all possible cards in the hand and return the best hand'''
     if 'J' not in hand:
         return hand
     other_cards = [c for c in hand if c != 'J']
