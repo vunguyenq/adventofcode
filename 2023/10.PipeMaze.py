@@ -1,7 +1,9 @@
 import datetime
 import os
 
-exec_part = 1  # which part to execute
+from matplotlib.path import Path
+
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -55,6 +57,7 @@ class Pipe():
 
 def parse_input(input):
     input = encode_ascii_pipe(input)
+    # print(input)  # Print here to see the pipe map
     input = input.split('\n')
     map_size = (len(input), len(input[0]))
     pipe_map = []
@@ -63,7 +66,7 @@ def parse_input(input):
         pipe_map.append([Pipe((r, c), char, map_size) for c, char in enumerate(row)])
         animal_col = row.find('S')
         animal_loc = (r, animal_col) if animal_col != -1 else animal_loc
-    fill_starting_pipe(pipe_map, animal_loc)        
+    fill_starting_pipe(pipe_map, animal_loc)
     return pipe_map, animal_loc
 
 def find_starting_adjacents(pipe_map, animal_loc):
@@ -109,7 +112,24 @@ def part1(input):
     return max([min(d1[k], d2[k]) for k in d1.keys()])
 
 def part2(input):
-    return 0
+    '''
+    Part 2 should use ray casting algorigthm to find the number of points that are enclosed in the loop.
+    https://www.researchgate.net/figure/Illustration-of-the-Ray-Casting-Algorithm_fig5_259468883
+    But I am lazy so just use matplotlib.path.Path.contains_points() method.
+    '''
+    pipe_map, animal_loc = input
+    start_pipe = pipe_map[animal_loc[0]][animal_loc[1]]
+
+    # Travel the pipe loop starting from animal_loc on any direction to get coordinates of the loop
+    pipe_loop = list([animal_loc, *travel_pipe_loop(animal_loc, start_pipe.adjacents[0], pipe_map).keys()])
+    polygon_path = Path(pipe_loop)
+    enclosed_tiles = 0
+    for r in range(len(pipe_map)):
+        for c in range(len(pipe_map[0])):
+            if (r, c) not in pipe_loop:
+                if polygon_path.contains_point((r, c)):
+                    enclosed_tiles += 1
+    return enclosed_tiles
 
 
 if __name__ == "__main__":
