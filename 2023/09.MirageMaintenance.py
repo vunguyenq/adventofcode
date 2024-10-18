@@ -18,17 +18,13 @@ def parse_input(input):
     return [np.array(list(map(int, r.split(' ')))) for r in input.split('\n')]
 
 def find_next_root_diff(arr):
-    if np.all(arr == 0):
-        return 0
-    return arr[-1] + find_next_root_diff(np.diff(arr))
+    return 0 if np.all(arr == 0) else arr[-1] + find_next_root_diff(np.diff(arr))
 
 def part1(input):
     return sum([find_next_root_diff(arr) for arr in input])
 
 def find_previous_root_diff(arr):
-    if np.all(arr == 0):
-        return 0
-    return arr[0] - find_previous_root_diff(np.diff(arr))
+    return 0 if np.all(arr == 0) else arr[0] - find_previous_root_diff(np.diff(arr))
 
 def part2(input):
     return sum([find_previous_root_diff(arr) for arr in input])
