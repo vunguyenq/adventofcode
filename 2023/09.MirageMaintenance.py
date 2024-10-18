@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-exec_part = 1  # which part to execute
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -25,8 +25,13 @@ def find_next_root_diff(arr):
 def part1(input):
     return sum([find_next_root_diff(arr) for arr in input])
 
+def find_previous_root_diff(arr):
+    if np.all(arr == 0):
+        return 0
+    return arr[0] - find_previous_root_diff(np.diff(arr))
+
 def part2(input):
-    return 0
+    return sum([find_previous_root_diff(arr) for arr in input])
 
 
 if __name__ == "__main__":
