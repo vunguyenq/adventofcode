@@ -4,7 +4,7 @@ from itertools import combinations
 
 import numpy as np
 
-exec_part = 1  # which part to execute
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -47,8 +47,31 @@ def part1(input):
     galaxy_pairs = list(combinations(galaxy_locs, 2))
     return sum([manhattan_distance(*pair) for pair in galaxy_pairs])
 
+def expand_galaxies(universe, galaxy_locs, expand_factor):
+    '''Update galaxy locations after each row/col expansion'''
+    zero_rows = np.all(universe == 0, axis=1)
+    zero_cols = np.all(universe == 0, axis=0)
+
+    shifted_rows = 0
+    for i in range(len(zero_rows)):
+        if zero_rows[i]:
+            galaxy_locs = [(loc[0] + expand_factor if loc[0] > i + shifted_rows else loc[0], loc[1]) for loc in galaxy_locs]
+            shifted_rows += expand_factor
+
+    shifted_cols = 0
+    for i in range(len(zero_cols)):
+        if zero_cols[i]:
+            galaxy_locs = [(loc[0], loc[1] + expand_factor if loc[1] > i + shifted_cols else loc[1]) for loc in galaxy_locs]
+            shifted_cols += expand_factor
+
+    return galaxy_locs
+
+
 def part2(input):
-    return 0
+    galaxy_locs = [(a[0], a[1]) for a in np.argwhere(input == 1)]
+    expanded_galaxy_locs = expand_galaxies(input, galaxy_locs, expand_factor=1000000 - 1)
+    galaxy_pairs = list(combinations(expanded_galaxy_locs, 2))
+    return sum([manhattan_distance(*pair) for pair in galaxy_pairs])
 
 
 if __name__ == "__main__":
