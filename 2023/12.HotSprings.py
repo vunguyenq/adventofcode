@@ -1,10 +1,11 @@
 import datetime
 import itertools
 import os
+from functools import cache
 
 import numpy as np
 
-exec_part = 1  # which part to execute
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -20,10 +21,11 @@ def parse_input(input):
     spring_conditions = []
     for row in input.split("\n"):
         condition, record = row.split(' ')
-        spring_conditions.append(np.array([c for c in condition.replace('.', '0').replace('#', '1').replace('?', '2')], dtype=int))
-
+        spring_conditions.append(condition)
         spring_records.append(tuple(map(int, record.split(','))))
     return spring_conditions, spring_records
+
+# =================== Part 1 - Brute force approach ===================
 
 def get_spring_record(spring_condition):
     change_points = np.diff(spring_condition, prepend=0, append=0)
@@ -52,19 +54,88 @@ def count_possible_arrangements(spring_condition, spring_record):
     return n_arrangements
 
 def part1(input):
+    '''Brute forcing, try all combinations. Slight optimization by only trying combinations with the correct number of #.'''
     spring_conditions, spring_records = input
+    spring_conditions = [np.array([c for c in condition.replace('.', '0').replace('#', '1').replace('?', '2')], dtype=int) for condition in spring_conditions]
     n_possible_arrangements = []
     rows = zip(spring_conditions, spring_records)
     n_rows = len(spring_conditions)
     for i, row in enumerate(rows):
         spring_condition, spring_record = row
         unknown_count, damage_count = get_unknown_damage_count(spring_condition, spring_record)
-        print(f"{datetime.datetime.now()} \t Row {i + 1}/{n_rows}. Row length: {len(spring_condition)}. Unknowns: {unknown_count}. Known damage: {damage_count}.")
+        print(f"{datetime.datetime.now()} \t Row {i + 1}/{n_rows}. Row length: {len(spring_condition)}. Unknowns: {unknown_count}. Unknown damage: {damage_count}.")
         n_possible_arrangements.append(count_possible_arrangements(spring_condition, spring_record))
     return sum(n_possible_arrangements)
 
+# =================== Part 2 - Memoized recursive approach ===================
+
+def print_debug(log: str, debug: bool = True):
+    if debug:
+        print(log)
+
+@cache  # Memoization
+def fill_unknowns(spring_condition, remaining_groups, debug=False):
+    '''Attempt to fill unknowns from left to right recursively.'''
+
+    print_debug(f"{spring_condition}, {remaining_groups}", debug=debug)
+
+    if len(spring_condition.replace('.', '')) == 0:  # Only operational springs left
+        return 1 if len(remaining_groups) == 0 else 0
+
+    if len(remaining_groups) == 0:  # All groups have been filled while there are still tiles left
+        return 0 if spring_condition.count('#') > 0 else 1
+
+    # Not enough spaces for the remaining groups including '.' delimiters
+    if len(spring_condition.replace('?', '#')) < sum(remaining_groups) + len(remaining_groups) - 1:
+        return 0
+
+    if spring_condition[0] == '.':
+        return fill_unknowns(spring_condition[1:], remaining_groups, debug=debug)
+    elif spring_condition[0] == '?':
+        fill_1 = '.' + spring_condition[1:]
+        fill_2 = '#' + spring_condition[1:]
+
+        fill1_res = fill_unknowns(fill_1, remaining_groups, debug=debug)
+        fill2_res = fill_unknowns(fill_2, remaining_groups, debug=debug)
+        print_debug(f"remaining_groups: {remaining_groups}, fill1: {fill_1}, fill2: {fill_2}, fill1_res: {fill1_res}, fill2_res: {fill2_res}", debug=debug)
+        return fill1_res + fill2_res
+    else:  # '#'
+        first_group_length = remaining_groups[0]
+        first_group = spring_condition.split('.')[0]
+
+        if len(first_group) < first_group_length:  # Spaces until the next delimiter is not enough for the first remaining group
+            return 0
+
+        if len(first_group.split('?')[0]) > first_group_length:  # Too many '#' at the beginning of the first group
+            return 0
+
+        if len(first_group) == first_group_length:  # Remaining string starts just enough '#' and '?' to fill the first group
+            return 1 if len(first_group) == len(spring_condition) else fill_unknowns(spring_condition[first_group_length + 1:], remaining_groups[1:], debug=debug)
+
+        if first_group[first_group_length] == '?':  # Remaining string starts with more '?' to fill the first group
+            return fill_unknowns(spring_condition[first_group_length + 1:], remaining_groups[1:], debug=debug)
+        else:  # Character right after the first group is '#' => longer than first group
+            return 0
+
+
 def part2(input):
-    return 0
+    spring_conditions, spring_records = input
+
+    # Unfolding x5
+    spring_conditions = ["?".join([s] * 5) for s in spring_conditions]
+    spring_records = [tuple(np.tile(arr, 5)) for arr in spring_records]
+
+    n_possible_arrangements = []
+    rows = list(zip(spring_conditions, spring_records))
+    n_rows = len(spring_conditions)
+    for i, row in enumerate(rows):
+        spring_condition, spring_record = row
+        unknown_count = spring_condition.count('?')
+        damage_count = sum(spring_record) - spring_condition.count('#')
+        print(f"{datetime.datetime.now()} \t Row {i + 1}/{n_rows}. Row length: {len(spring_condition)}. Unknowns: {unknown_count}. Unknown damage: {damage_count}.")
+        n_possible_arrangements.append(fill_unknowns(spring_condition, spring_record))
+
+    return sum(n_possible_arrangements)
 
 
 if __name__ == "__main__":
