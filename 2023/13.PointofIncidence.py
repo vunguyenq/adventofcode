@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-exec_part = 1  # which part to execute
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -21,7 +21,7 @@ def parse_input(input):
         patterns.append(np.array([list(map(int, list(r))) for r in p.split('\n')]))
     return patterns
 
-def find_mirror_row(arr: np.ndarray):
+def find_mirror_row(arr: np.ndarray, compare_condition: str = 'all_matched'):
     '''
     Get index of first mirror row if any.
     mirror row = n if row[n] == row[n+1]; row[n-1] == row[n+2] and so on until one direction runs out of rows.
@@ -32,17 +32,33 @@ def find_mirror_row(arr: np.ndarray):
         mirror_width = min(r + 1, rows - r - 1)
         upper_part = arr[r - mirror_width + 1:r + 1]
         lower_part = arr[r + 1: r + mirror_width + 1][::-1]  # Reverse rows in the lower part
-        if np.array_equal(upper_part, lower_part):
+
+        if compare_condition == 'all_matched':
+            matched = np.array_equal(upper_part, lower_part)
+        elif compare_condition == 'exact_1_diff':
+            matched = np.sum(upper_part != lower_part) == 1
+        else:
+            raise ValueError('Invalid compare condition')
+
+        if matched:
             return r + 1
     return 0
 
-def find_mirror_column(arr: np.ndarray) -> int:
+def find_mirror_column(arr: np.ndarray, compare_condition: str = 'all_matched') -> int:
     cols = arr.shape[1]
     for c in range(cols)[:-1]:
         mirror_width = min(c + 1, cols - c - 1)
         left_part = arr[:, c - mirror_width + 1:c + 1]
         right_part = arr[:, c + 1: c + mirror_width + 1][:, ::-1]  # Reverse columns in the right part
-        if np.array_equal(left_part, right_part):
+
+        if compare_condition == 'all_matched':
+            matched = np.array_equal(left_part, right_part)
+        elif compare_condition == 'exact_1_diff':
+            matched = np.sum(left_part != right_part) == 1
+        else:
+            raise ValueError('Invalid compare condition')
+
+        if matched:
             return c + 1
     return 0
 
@@ -55,7 +71,17 @@ def part1(input):
     return sum(mirror_rows) * 100 + sum(mirror_columns)
 
 def part2(input):
-    return 0
+    mirror_rows = []
+    mirror_columns = []
+    for pattern in input:
+        row = find_mirror_row(pattern, 'exact_1_diff')
+        col = find_mirror_column(pattern, 'exact_1_diff')
+        if (row, col) == (0, 0):
+            row = find_mirror_row(pattern, 'all_matched')
+            col = find_mirror_column(pattern, 'all_matched')
+        mirror_rows.append(row)
+        mirror_columns.append(col)
+    return sum(mirror_rows) * 100 + sum(mirror_columns)
 
 
 if __name__ == "__main__":
