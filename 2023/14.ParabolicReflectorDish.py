@@ -1,7 +1,7 @@
 import datetime
 import os
 
-exec_part = 1  # which part to execute
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -30,32 +30,49 @@ class Platform:
                     row.append('.')
             print(''.join(row))
 
-    def validate_position(self, row, col):
-        if row < 0 or row >= self.size[0] or col < 0 or col >= self.size[1]:
-            return False
-        for cube in self.cubes:
+    def validate_move_position(self, row, col):
+        if row < 0 or row >= self.size[0] or col < 0 or col >= self.size[1]:  # hits border
+            return 'border'
+        for cube in self.cubes:  # hits cube
             if cube[0] == row and cube[1] == col:
-                return False
-        for rock in self.rounded_rocks:
+                return 'cube'
+        for rock in self.rounded_rocks:  # hits rounded rock
             if rock.row == row and rock.col == col:
-                return False
-        return True
+                return 'rock'
+        return 'movable'
 
     def tilt(self, direction):
         no_more_moves = False
+        movable_rocks = self.rounded_rocks.copy()
+        finished_rocks = []
         while not no_more_moves:
             no_more_moves = True
-            for rock in self.rounded_rocks:
+            for rock in movable_rocks.copy():
                 new_pos = rock.soft_roll(direction)
-                if self.validate_position(new_pos[0], new_pos[1]):
+                next_move_validation = self.validate_move_position(new_pos[0], new_pos[1])
+                if next_move_validation == 'movable':
                     rock.roll(direction)
                     no_more_moves = False
+                elif next_move_validation in ('border', 'cube') or new_pos in finished_rocks:  # hits border, cube or another rock that finished moving
+                    movable_rocks.remove(rock)
+                    finished_rocks.append((rock.row, rock.col))
+                else:
+                    continue
 
     def get_total_load(self):
         total_load = 0
         for rock in self.rounded_rocks:
-            total_load += self.size[0] - rock.row 
+            total_load += self.size[0] - rock.row
         return total_load
+
+    def get_rounded_rock_positions(self):
+        return tuple(sorted([(rock.row, rock.col) for rock in self.rounded_rocks]))
+
+    def run_cycle(self):
+        cycle_directions = ['north', 'west', 'south', 'east']
+        for direction in cycle_directions:
+            self.tilt(direction)
+
 
 class RoundedRock:
     def __init__(self, row, col):
@@ -79,6 +96,7 @@ class RoundedRock:
         self.row = new_pos[0]
         self.col = new_pos[1]
 
+
 def parse_input(input):
     rows = input.split('\n')
     platform = Platform(len(rows), len(rows[0]))
@@ -98,7 +116,29 @@ def part1(input):
     return platform.get_total_load()
 
 def part2(input):
-    return 0
+    platform = input
+    seen_states = []
+    i = 0
+    while True:
+        i += 1
+        platform.run_cycle()
+        positions = hash(platform.get_rounded_rock_positions())
+        if positions in seen_states:
+            repeated_cycle = seen_states.index(positions) + 1
+            repeated_cycle_length = i - repeated_cycle
+            break
+        seen_states.append(positions)
+
+        print(datetime.datetime.now(), '\t', f"Running cycle {i}...")
+
+    print(f"\nFound first seen state after {i:,} cycles. State was seen at cycle {repeated_cycle:,}")
+    remaining_cycles = (1000000000 - repeated_cycle) % repeated_cycle_length
+    skipped_cycles = (1000000000 - repeated_cycle) // repeated_cycle_length
+    print(f"Skip {skipped_cycles:,} cycles and run {remaining_cycles:,} remaining cycles...\n")
+    for i in range(remaining_cycles):
+        print(datetime.datetime.now(), '\t', f"Running cycle {i+1}...")
+        platform.run_cycle()
+    return platform.get_total_load()
 
 
 if __name__ == "__main__":
