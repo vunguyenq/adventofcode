@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-exec_part = 1  # which part to execute
+exec_part = 2  # which part to execute
 exec_test_case = 0  # -1 = all test inputs, n = n_th test input; 0 = real puzzle input
 
 # Puzzle input
@@ -115,7 +115,22 @@ def part1(input):
     return platform.count_energized_tiles()
 
 def part2(input):
-    return 0
+    grid = input
+    nrow, ncol = input.shape
+    starting_positions = {'down': tuple((0, i) for i in range(ncol)),
+                          'up': tuple((nrow - 1, i) for i in range(ncol)),
+                          'right': tuple((i, 0) for i in range(nrow)),
+                          'left': tuple((i, ncol - 1) for i in range(nrow))
+                          }
+
+    max_energized_tiles = 0
+    for direction, positions in starting_positions.items():
+        for pos in positions:
+            platform = Platform(grid)
+            platform.add_beam(Beam(pos, direction))
+            platform.move_all_beams()
+            max_energized_tiles = max(max_energized_tiles, platform.count_energized_tiles())
+    return max_energized_tiles
 
 
 if __name__ == "__main__":
