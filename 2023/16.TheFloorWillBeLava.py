@@ -16,69 +16,104 @@ with open(os.path.join(dirname, 'input/input16.txt')) as f:
 
 ENCODE = {'.': 0, '/': 1, '\\': 2, '|': 3, '-': 4, 'up': 5, 'down': 6, 'left': 7, 'right': 8}
 DECODE = {0: '.', 1: '/', 2: '\\', 3: '|', 4: '-', 5: 'up', 6: 'down', 7: 'left', 8: 'right'}
+NEXT_DIRECTION_FORWARD_SLASH = {'up': 'right', 'down': 'left', 'right': 'up', 'left': 'down'}
+NEXT_DIRECTION_BACKWARD_SLASH = {'up': 'left', 'down': 'right', 'left': 'up', 'right': 'down'}
 
 def parse_input(input):
     return np.array([[ENCODE[c] for c in r] for r in input.split('\n')])
 
-def move_beam(beam_pos: tuple[int], direction: str, grid: np.ndarray, visited_states: set) -> None:
-    # Energize the current tile
-    r, c = beam_pos
-    visited_states.add((r, c, ENCODE[direction]))
-    # print(r, c, direction, visited_states, end='')
+class Beam:
+    def __init__(self, pos: tuple[int], direction: str):
+        self.pos = pos
+        self.direction = direction
 
-    # Move the beam
-    if direction == 'up':
-        r -= 1
-    elif direction == 'down':
-        r += 1
-    elif direction == 'left':
-        c -= 1
-    elif direction == 'right':
-        c += 1
-    else:
-        raise ValueError(f"Invalid direction: {direction}")
+class Platform:
+    '''
+    Platform class to keep track of the grid, energized status, visited states, and beams.
+    Original beam and subsequent beams created by \ - splits are tracked in stack self.beams.
+    Every time a beam is split, the beam is terminated and the 2 new beams are added to the stack.
+    '''
+    def __init__(self, grid: np.ndarray):
+        self.grid = grid
+        self.energized_status = np.zeros_like(grid)
+        self.visited_states = set()
+        self.beams = []
 
-    # Check stopping conditions
-    out_of_bounds = r < 0 or r >= grid.shape[0] or c < 0 or c >= grid.shape[1]
-    visited = (r, c, ENCODE[direction]) in visited_states
-    if out_of_bounds or visited:
-        return
+    def add_beam(self, beam: Beam):
+        self.beams.append(beam)
 
-    # Check type of tile the beam hits
-    tile = DECODE[grid[r][c]]
-    # print('\t', tile)
-    if tile == '.':
-        move_beam((r, c), direction, grid, visited_states)
-    elif tile == '/':
-        next_directions = {'up': 'right', 'down': 'left', 'right': 'up', 'left': 'down'}
-        move_beam((r, c), next_directions[direction], grid, visited_states)
-    elif tile == '\\':
-        next_directions = {'up': 'left', 'down': 'right', 'left': 'up', 'right': 'down'}
-        move_beam((r, c), next_directions[direction], grid, visited_states)
-    elif tile == '|':
-        if direction in ['up', 'down']:
-            move_beam((r, c), direction, grid, visited_states)
-        else:
-            move_beam((r, c), 'up', grid, visited_states)
-            move_beam((r, c), 'down', grid, visited_states)
-    elif tile == '-':
-        if direction in ['left', 'right']:
-            move_beam((r, c), direction, grid, visited_states)
-        else:
-            move_beam((r, c), 'left', grid, visited_states)
-            move_beam((r, c), 'right', grid, visited_states)
-    else:
-        raise ValueError(f"Invalid tile: {tile}")
+    def move_all_beams(self):
+        while self.beams:
+            beam = self.beams.pop()
+            self.move_beam(beam)
+
+    def move_beam(self, beam: Beam):
+        split = False
+        while True:
+            r, c = beam.pos
+
+            # Check stopping conditions
+            out_of_bounds = r < 0 or r >= self.grid.shape[0] or c < 0 or c >= self.grid.shape[1]
+            visited = (r, c, ENCODE[beam.direction]) in self.visited_states
+            if out_of_bounds or visited or split:
+                return
+
+            # Energize the current tile and track visited states
+            self.energized_status[r, c] = 1
+            self.visited_states.add((r, c, ENCODE[beam.direction]))
+
+            # Check type of current tile
+            tile = DECODE[self.grid[r][c]]
+            if tile == '.':
+                direction = beam.direction
+            elif tile == '/':
+                direction = NEXT_DIRECTION_FORWARD_SLASH[beam.direction]
+            elif tile == '\\':
+                direction = NEXT_DIRECTION_BACKWARD_SLASH[beam.direction]
+            elif tile == '|':
+                if beam.direction in ['up', 'down']:
+                    direction = beam.direction
+                else:
+                    self.beams.append(Beam((r, c), 'up'))
+                    self.beams.append(Beam((r, c), 'down'))
+                    direction = 'split'
+            elif tile == '-':
+                if beam.direction in ['left', 'right']:
+                    direction = beam.direction
+                else:
+                    self.beams.append(Beam((r, c), 'left'))
+                    self.beams.append(Beam((r, c), 'right'))
+                    direction = 'split'
+            else:
+                raise ValueError(f"Invalid tile: {tile}")
+
+            # Move the beam
+            if direction == 'up':
+                r -= 1
+            elif direction == 'down':
+                r += 1
+            elif direction == 'left':
+                c -= 1
+            elif direction == 'right':
+                c += 1
+            elif direction == 'split':
+                split = True
+                continue
+            else:
+                raise ValueError(f"Invalid direction: {beam.direction}")
+
+            beam.pos = (r, c)
+            beam.direction = direction
+
 
 def part1(input):
     grid = input
-    visited_states = set()
-    try:
-        move_beam((0, -1), 'right', grid, visited_states)
-    except RecursionError:
-        print('RecursionError', len(visited_states))
-    return len(set([(r, c) for r, c, _ in visited_states]))
-    # return visited_states
+    platform = Platform(grid)
+    platform.add_beam(Beam((0, 0), 'right'))
+    platform.move_all_beams()
+    print(platform.energized_status)
+    return len(set([(r, c) for r, c, _ in platform.visited_states])), np.sum(platform.energized_status)
+    # return platform.visited_states
 
 def part2(input):
     return 0
