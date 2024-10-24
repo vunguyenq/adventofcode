@@ -1,3 +1,6 @@
 Day 12: 
     - Recursion with Memoization by using @cache decoration. Huge performance boost if recursive steps are repetitive.
     - This decorator automatically caches the result of each function call. When the function is called with the same arguments again, it retrieves the result from the cache instead of recalculating it.
+
+Day 16:
+    - DFS tracks new paths using stack; BFS tracks using queue.
