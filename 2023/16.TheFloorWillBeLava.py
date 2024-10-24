@@ -30,12 +30,11 @@ class Beam:
 class Platform:
     '''
     Platform class to keep track of the grid, energized status, visited states, and beams.
-    Original beam and subsequent beams created by \ - splits are tracked in stack self.beams.
+    Original beam and subsequent beams created by \\ - splits are tracked in stack self.beams.
     Every time a beam is split, the beam is terminated and the 2 new beams are added to the stack.
     '''
     def __init__(self, grid: np.ndarray):
         self.grid = grid
-        self.energized_status = np.zeros_like(grid)
         self.visited_states = set()
         self.beams = []
 
@@ -58,8 +57,7 @@ class Platform:
             if out_of_bounds or visited or split:
                 return
 
-            # Energize the current tile and track visited states
-            self.energized_status[r, c] = 1
+            # Track visited states
             self.visited_states.add((r, c, ENCODE[beam.direction]))
 
             # Check type of current tile
@@ -105,15 +103,16 @@ class Platform:
             beam.pos = (r, c)
             beam.direction = direction
 
+    def count_energized_tiles(self):
+        return len(set([(r, c) for r, c, _ in self.visited_states]))
+
 
 def part1(input):
     grid = input
     platform = Platform(grid)
     platform.add_beam(Beam((0, 0), 'right'))
     platform.move_all_beams()
-    print(platform.energized_status)
-    return len(set([(r, c) for r, c, _ in platform.visited_states])), np.sum(platform.energized_status)
-    # return platform.visited_states
+    return platform.count_energized_tiles()
 
 def part2(input):
     return 0
